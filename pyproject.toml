@@ -16,7 +16,8 @@ classifiers = [
 Changelog = "https://github.com/TLouf/respace/releases"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
+xarray = ">=2023.01.0"
 
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = ">=6.2"}
