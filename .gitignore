@@ -1,0 +1,25 @@
+.mypy_cache/
+/.coverage
+/.coverage.*
+/.nox/
+/.python-version
+/.pytype/
+/dist/
+/docs/_build/
+/src/*.egg-info/
+__pycache__/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+notebooks/
+
+# dotenv
+.env
+
+# virtualenv
+.venv
+venv/
+ENV/
+
+# IDE settings
+.vscode/
