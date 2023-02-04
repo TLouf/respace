@@ -41,6 +41,12 @@ sphinx-autobuild = ">=2021.3.14"
 sphinx_copybutton = ">=0.5.1"
 myst-parser = {version = ">=0.16.1"}
 
+[tool.poetry.group.jupyter]
+optional = true
+
+[tool.poetry.group.jupyter.dependencies]
+jupyterlab = ">= 3.6.1"
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]
