@@ -6,7 +6,6 @@ import sys
 
 import respace
 
-
 project = "ReSpace"
 author = "Thomas Louf"
 copyright = "2023, Thomas Louf"
@@ -38,9 +37,7 @@ intersphinx_mapping = {
 
 
 def linkcode_resolve(domain, info):
-    """
-    Determine the URL corresponding to Python object
-    """
+    """Determine the URL corresponding to Python object."""
     if domain != "py":
         return None
 
@@ -70,12 +67,8 @@ def linkcode_resolve(domain, info):
     except OSError:
         lineno = None
 
-    if lineno:
-        linespec = f"#L{lineno}-L{lineno + len(source) - 1}"
-    else:
-        linespec = ""
+    linespec = f"#L{lineno}-L{lineno + len(source) - 1}" if lineno else ""
 
     fn = os.path.relpath(fn, start=os.path.dirname(respace.__file__))
 
     return f"https://github.com/TLouf/respace/blob/master/respace/{fn}{linespec}"
-
