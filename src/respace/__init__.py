@@ -7,5 +7,13 @@ if sys.version_info < (3, 10):
 else:
     from importlib import metadata
 
+from respace.parameters import Parameter, ParameterSet
+from respace.result import ResultSet
+
+__all__ = [
+    Parameter,
+    ParameterSet,
+    ResultSet,
+]
 
 __version__ = metadata.version("respace")
