@@ -11,9 +11,9 @@ from respace.parameters import Parameter, ParameterSet
 from respace.result import ResultSet
 
 __all__ = [
-    Parameter,
-    ParameterSet,
-    ResultSet,
+    "Parameter",
+    "ParameterSet",
+    "ResultSet",
 ]
 
 __version__ = metadata.version("respace")
