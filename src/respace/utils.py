@@ -1,13 +1,29 @@
 from __future__ import annotations
 
 import inspect
+import pickle
 import time
 from collections.abc import Hashable
 from functools import wraps
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from respace.result import ResultSet
+
+
+def save_pickle(object: Any, save_path: Path):
+    """Save `object` to pickle format at `save_path`.
+
+    Parameters
+    ----------
+    object : Any
+        Oject to save.
+    save_path : Path
+        Path where to save `object`.
+    """
+    with open(save_path, "wb") as f:
+        pickle.dump(object, f)
 
 
 def _tracking(
