@@ -121,9 +121,6 @@ class ResultSet:
     def coords(self):
         return self.param_space.coords
 
-    @coords.setter
-    def coords(self, coords_):
-        self.param_space.coords = coords_
 
     @property
     def params_values(self) -> dict:
