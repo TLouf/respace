@@ -309,12 +309,6 @@ class ResultSet:
     def populated_space(self):
         return np.where(self.populated_mask, drop=True)
 
-    @property
-    def compute_dict(self) -> dict[str, Callable]:
-        return {
-            name: self[name].attrs["compute_fun"] for name in self.param_space.data_vars
-        }
-
     def get_subspace_res(
         self, subspace_params: dict, keep_others_default_only: bool = False
     ) -> ResultSet:
