@@ -94,7 +94,6 @@ class ResultSet:
     def _repr_html_(self) -> str:
         return self.param_space._repr_html_()
 
-
     def __getitem__(self, r: Hashable | list[Hashable]):
         """Get the parameter space for one or a set of results.
 
@@ -109,7 +108,6 @@ class ResultSet:
             Parameter space(s) of `r`.
         """
         return self.param_space[r]
-
 
     @property
     def attrs(self):
