@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Hashable
+from collections.abc import Hashable, Iterator
 from dataclasses import dataclass, field
 
-import pandas as pd
+from respace._typing import ParamsDictType
 
 
 @dataclass
@@ -26,7 +26,7 @@ class Parameter:
     default: Hashable
     values: list[Hashable] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Put default in self.values[0].
         if len(self.values) == 0:
             self.values.append(self.default)
@@ -54,20 +54,20 @@ class ParameterSet:
         Sorted list of `Parameter` instances.
     """
 
-    def __init__(self, parameters: list[Parameter] | dict):
+    def __init__(self, parameters: list[Parameter] | ParamsDictType) -> None:
         if isinstance(parameters, dict):
             parameters = [
                 Parameter(key, v)
-                if pd.api.types.is_scalar(v)
-                else Parameter(key, v[0], v)
+                if isinstance(v, Hashable)
+                else Parameter(key, v[0], v)  # type: ignore[index,arg-type]
+                # mypy is just wrong here
                 for key, v in parameters.items()
             ]
-
         self.parameters = sorted(parameters, key=lambda p: p.name)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Parameter]:
         return iter(self.parameters)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, list[Hashable]]:
         """Return a dictionary giving the possible values of all parameters."""
         return {p.name: p.values for p in self}
