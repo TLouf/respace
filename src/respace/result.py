@@ -45,6 +45,41 @@ class ResultSetMetadata:
 
 
 class ResultSet:
+    """Hold a set of results within their parameter space.
+
+    Parameters
+    ----------
+    results_metadata : ResultSetMetadata | dict
+        :class:`respace.ResultMetadata`, or dictionary that at least gives the result
+        names (keys) and the functions to call to compute them (values), or dictionary
+        of dictionaries giving keys as in :class:`respace.ResultMetadata`.
+    params : ParamsType
+        by definitions then, parameters need be of consistent type, and be Hashable
+        (because DataArray coordinates are based on :class:`pandas.Index` (ref
+        https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dimension-coordinate)
+    attrs : dict, optional
+        Global attributes to save on this result set.
+    save_path_fmt : str | Path, optional
+        Default format for the save path of results. Will be formatted with the
+        :meth:`str.format` method, with a dictionary mapping "res_name" and the names of
+        all parameters in the set to respectively the name of the result being saved and
+        the value of the parameters. The default is
+        ``"{res_name}_parameter1={parameter1}_ ..."``.
+
+    Attributes
+    ----------
+    param_space : xarray.Dataset
+        :class:`xarray.Dataset` which contains a :class:`xarray.DataArray` for each
+        result of the set. Its coordinates are the possible values of all parameters.
+        Its values are the indices where the result's computated values are stored in
+        the list "computed_values", which is accessible as one of the attributes of the
+        DataArray. The default value of -1 means the result has not been computed for
+        the corresponding set of parameters, and a new value shall be computed and
+        appended to "computed_values".
+    save_path_fmt: Path
+        Default format for the save path of results.
+    """
+
     def __init__(
         self,
         results_metadata: ResultSetMetadata | dict,
