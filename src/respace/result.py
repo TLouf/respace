@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Hashable, Iterator
+from collections.abc import Callable, Hashable, Iterator, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -131,6 +131,9 @@ class ResultSet:
     def save_path_fmt(self, save_path_fmt: str | Path) -> None:
         self._save_path_fmt = Path(save_path_fmt)
 
+    @property
+    def params_values(self) -> dict[str, Sequence[Hashable]]:
+        """Return a dictionary with the possible values of all parameters."""
         return {
             param_name: param_values.data
             for param_name, param_values in self.coords.items()
