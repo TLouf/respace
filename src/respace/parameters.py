@@ -3,8 +3,10 @@ from __future__ import annotations
 import contextlib
 from collections.abc import Hashable, Iterator
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
-from respace._typing import ParamsDictType
+if TYPE_CHECKING:
+    from respace._typing import ParamsDictType
 
 
 @dataclass
