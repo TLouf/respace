@@ -266,6 +266,19 @@ class ResultSet:
         save_fun(res_value, save_path)
         return res_value
 
+    def get_save_path(
+        self, res_name: str, params: dict, save_path_fmt: Path | str | None = None
+    ) -> Path:
+        if save_path_fmt is None:
+            save_path_fmt = str(self.save_path_fmt)
+        else:
+            save_path_fmt = str(save_path_fmt)
+
+        complete_param_set = self.fill_with_defaults(params)
+        save_path = Path(save_path_fmt.format(res_name=res_name, **complete_param_set))
+        save_suffix = self[res_name].attrs["save_suffix"]
+        return save_path.with_suffix(save_suffix)
+
     def get_nth_last_computed(self, res_name: str, n: int = 1):
         return self[res_name].attrs["computed_values"][-n]
 
