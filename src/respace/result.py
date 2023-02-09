@@ -224,13 +224,22 @@ class ResultSet:
         self[res_name].loc[complete_param_set] = res_coord
         return result
 
-    def get(self, res_name, params: dict, **add_kwargs):
-        """Get.
+    def get(self, res_name: str, params: dict, **add_kwargs):
+        """Get the value of result `res_name` for set of parameters `params`.
 
-        add_kwargs will hold other arguments needed for compute_fun that are not
-        considered as params (external data eg).
-        TODO: add **params_kwargs using this?
-        https://github.com/pydata/xarray/blob/d385e2063a6b5919e1fe9dd3e27a24bc7117137e/xarray/core/utils.py#L270
+        Parameters
+        ----------
+        res_name : str
+            Name of the result to get.
+        params : dict
+            Dictionary of parameters for which to get the result.
+        **add_kwargs:
+            Additional keyword arguments to pass to `res_name`'s computing function,
+            like external data for instance.
+
+        Returns
+        -------
+        result value
         """
         complete_param_set = self.fill_with_defaults(params)
         try:
@@ -242,7 +251,7 @@ class ResultSet:
             # anyway
             pass
 
-        return self.compute(complete_param_set, **add_kwargs)
+        return self.compute(res_name, complete_param_set, **add_kwargs)
 
     def get_nth_last_computed(self, res_name, n=1):
         return self[res_name].attrs["computed_values"][-n]
