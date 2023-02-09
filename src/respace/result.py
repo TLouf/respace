@@ -143,11 +143,11 @@ class ResultSet:
         }
 
     @property
-    def param_defaults(self) -> dict:
+    def param_defaults(self) -> dict[str, Hashable]:
+        """Return a dictionary with the default values of all parameters."""
         d = {
             param_name: param_values.data[0]
             for param_name, param_values in self.coords.items()
-            if param_values.size > 0
         }
         return d
 
