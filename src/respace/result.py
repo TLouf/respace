@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Hashable, Iterator
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -85,16 +85,31 @@ class ResultSet:
             save_path_fmt = Path(save_path_fmt)
         self.save_path_fmt = save_path_fmt
 
-    def __getitem__(self, r: str | list[str]):
+    def __str__(self) -> str:
+        return str(self.param_space)
+
+    def __repr__(self) -> str:
+        return repr(self.param_space)
+
+    def _repr_html_(self) -> str:
+        return self.param_space._repr_html_()
+
+
+    def __getitem__(self, r: Hashable | list[Hashable]):
+        """Get the parameter space for one or a set of results.
+
+        Parameters
+        ----------
+        r : str | list[str]
+            Name of list of names of results to get the parameter space of.
+
+        Returns
+        -------
+        param_space
+            Parameter space(s) of `r`.
+        """
         return self.param_space[r]
 
-    @property
-    def name(self):
-        return self.param_space.name
-
-    @name.setter
-    def name(self, name_: str):
-        self.param_space.name = name_
 
     @property
     def attrs(self):
