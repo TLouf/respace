@@ -214,7 +214,7 @@ class ResultSet:
                 **complete_param_set, **add_kwargs
             )
         except TypeError as e:
-            raise e(
+            raise ValueError(
                 "You passed new parameters, but it seems `compute_fun` was not updated"
                 " to accept them."
             ) from e
