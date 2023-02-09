@@ -348,14 +348,12 @@ class ResultSet:
     def get_subspace_res(
         self, subspace_params: dict, keep_others_default_only: bool = False
     ) -> ResultSet:
-        """_summary_.
-
-        TODO: get subset of res with all this functionality too
+        """Return the subset of the result set for the given parameter values.
 
         Parameters
         ----------
         subspace_params : dict
-            _description_
+            Dictionary giving some parameters' subset of values to keep.
         keep_others_default_only : bool, optional
             If False, the default, for parameters not specified in `subspace_params`,
             keep only the coordinate of their defaults values. If True, keep all their
@@ -363,8 +361,7 @@ class ResultSet:
 
         Returns
         -------
-        Result
-            _description_
+        ResultSet
         """
         if keep_others_default_only:
             complete_param_set = self.fill_with_defaults(subspace_params)
@@ -372,7 +369,7 @@ class ResultSet:
             complete_param_set = {**self.params_values, **subspace_params}
         param_subspace = self.param_space.loc[complete_param_set]
         subspace_res = ResultSet(
-            compute_dict=self.compute_dict, params=complete_param_set
+            results_metadata=self.results_metadata, params=complete_param_set
         )
         # values from ranking of flattened values -> array of ranks. Then subsitute
         # number of -1s in original array to have 0 actually correspond to the first
@@ -386,7 +383,7 @@ class ResultSet:
                 .reshape(param_subspace.shape)
             )
             param_data = param_data - (param_subspace[res_name] < 0).sum()
-            subspace_res.param_space[res_name].data = param_data
+            subspace_res[res_name].data = param_data
             idc_res = np.unique(param_subspace[res_name])
             subspace_res[res_name].attrs["computed_values"] = [
                 self[res_name].attrs["computed_values"][i] for i in idc_res[1:]
