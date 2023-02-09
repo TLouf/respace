@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Hashable, Iterator, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -198,6 +199,15 @@ class ResultSet:
 
     def compute(self, res_name, params: dict, **add_kwargs):
         complete_param_set = self.fill_with_defaults(params)
+        # Add other results to add_kwargs if necessary.
+        argspec = inspect.getfullargspec(self[res_name].compute_fun)
+        possible_kwds = set(argspec.args + argspec.kwonlyargs)
+        res_names = set(self.param_space.data_vars.keys())
+        other_res_deps = {
+            rn: self.get(rn, complete_param_set, **add_kwargs)
+            for rn in possible_kwds.intersection(res_names)
+        }
+        add_kwargs = {**add_kwargs, **other_res_deps}
         try:
             result = self[res_name].tracking_compute_fun(
                 **complete_param_set, **add_kwargs
