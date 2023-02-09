@@ -1,57 +1,72 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from dataclasses import asdict, dataclass
 
 import numpy as np
 import xarray as xr
+from typing_extensions import Self
 
 from respace._typing import ParamsType
 from respace.parameters import ParameterSet
-from respace.utils import _tracking
+from respace.utils import _tracking, save_pickle
 
 xr.set_options(keep_attrs=True)
 
 
-# TODO: handle results inter-dependence. check in params of compute_fun, if name matches
-# another result's, compute it and add to kwargs dictionary
+@dataclass
+class ResultMetadata:
+    name: str
+    compute_fun: Callable
+    save_fun: Callable = save_pickle
+    save_suffix: str = ".pickle"
+
+
+@dataclass
+class ResultSetMetadata:
+    results: list[ResultMetadata]
+
+    @classmethod
+    def from_dict(cls, d: dict) -> Self:
+        # Keys are names
+        results = []
+        for name, metadata in d.items():
+            if not isinstance(metadata, dict):
+                # Then metadata is `compute_fun`.
+                metadata = {"compute_fun": metadata}
+            results.append(ResultMetadata(name, **metadata))
+        return cls(results)
+
+    def __iter__(self) -> Iterator[ResultMetadata]:
+        return iter(self.results)
+
+
 class ResultSet:
     def __init__(
         self,
-        compute_dict: dict[str, Callable],
+        results_metadata: ResultSetMetadata | dict,
         params: ParamsType,
-    ):
-        """Init.
-
-        param_space
-            dataarray which gives index of `values` where to find the result of
-            computation with set of parameters corresponding to coordinates of array.
-            The default value of -1 means it has not been computed, and a new value
-            shall be computed and appended to `values`. by definitions then, parameters
-            need be of consistent type, and be Hashable (because DataArray coordinates
-            are based on pandas.Index (ref
-            https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dimension-coordinate)
-            and a pandas Index can only contain hashable objects (ref
-            https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Index.html#pandas.Index)
-        values
-            this is list so it can hold any type (including mixed ones).
-        """
+    ) -> None:
         params_set = params
         if not isinstance(params_set, ParameterSet):
             params_set = ParameterSet(params_set)
+        if isinstance(results_metadata, dict):
+            results_metadata = ResultSetMetadata.from_dict(results_metadata)
+
         dims = [p.name for p in params_set]
-        data = -np.ones([len(p.values) for p in params_set], dtype=int)
+        data = -np.ones([len(p.values) for p in params_set], dtype="int")
         data_vars = {
-            n: xr.Variable(
+            r.name: xr.Variable(
                 dims,
                 data,
                 attrs={
-                    "compute_fun": fun,
-                    "tracking_compute_fun": _tracking(self, n)(fun),
+                    "tracking_compute_fun": _tracking(self, r.name)(r.compute_fun),
                     "computed_values": [],
                     "compute_times": [],
+                    **asdict(r),
                 },
-            )
-            for n, fun in compute_dict.items()
+            )  # type: ignore[no-untyped-call]
+            for r in results_metadata
         }
         self.param_space = xr.Dataset(
             data_vars=data_vars,
