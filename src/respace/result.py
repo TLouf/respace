@@ -111,16 +111,17 @@ class ResultSet:
 
     @property
     def attrs(self):
+        """Return the attributes dictionary of the ResultSet."""
         return self.param_space.attrs
 
     @attrs.setter
-    def attrs(self, attrs_: dict):
+    def attrs(self, attrs_: dict) -> None:
         self.param_space.attrs = attrs_
 
     @property
     def coords(self):
+        """Return the coordinates of the parameter space."""
         return self.param_space.coords
-
 
     @property
     def save_path_fmt(self):
