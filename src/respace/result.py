@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterator
 from dataclasses import asdict, dataclass
+from pathlib import Path
 
 import numpy as np
 import xarray as xr
@@ -46,6 +47,8 @@ class ResultSet:
         self,
         results_metadata: ResultSetMetadata | dict,
         params: ParamsType,
+        attrs: dict | None = None,
+        save_path_fmt: str | Path | None = None,
     ) -> None:
         params_set = params
         if not isinstance(params_set, ParameterSet):
@@ -68,10 +71,19 @@ class ResultSet:
             )  # type: ignore[no-untyped-call]
             for r in results_metadata
         }
+        params_dict = params_set.to_dict()
         self.param_space = xr.Dataset(
             data_vars=data_vars,
             coords=params_set.to_dict(),
+            attrs=attrs,
         )
+        if save_path_fmt is None:
+            save_path_fmt = "_".join(
+                ["{res_name}"] + [f"{p}={{p}}" for p in params_dict]
+            )
+        if isinstance(save_path_fmt, str):
+            save_path_fmt = Path(save_path_fmt)
+        self.save_path_fmt = save_path_fmt
 
     def __getitem__(self, r: str | list[str]):
         return self.param_space[r]
