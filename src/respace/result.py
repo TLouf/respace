@@ -253,10 +253,10 @@ class ResultSet:
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
-    def get_nth_last_computed(self, res_name, n=1):
+    def get_nth_last_computed(self, res_name: str, n: int = 1):
         return self[res_name].attrs["computed_values"][-n]
 
-    def get_nth_last_details(self, res_name, n=1):
+    def get_nth_last_details(self, res_name: str, n: int = 1):
         value = self.get_nth_last_computed(res_name, n=n)
         params_idc = np.nonzero(
             self[res_name].param_space.data
