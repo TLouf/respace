@@ -253,6 +253,19 @@ class ResultSet:
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
+    def save(
+        self,
+        res_name: str,
+        params: dict,
+        save_path_fmt: Path | str | None = None,
+        **add_kwargs,
+    ) -> Any:
+        save_fun = self[res_name].attrs["save_fun"]
+        save_path = self.get_save_path(res_name, params, save_path_fmt=save_path_fmt)
+        res_value = self.get(res_name, params, **add_kwargs)
+        save_fun(res_value, save_path)
+        return res_value
+
     def get_nth_last_computed(self, res_name: str, n: int = 1):
         return self[res_name].attrs["computed_values"][-n]
 
