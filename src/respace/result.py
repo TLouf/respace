@@ -4,6 +4,7 @@ import inspect
 from collections.abc import Callable, Hashable, Iterator, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import xarray as xr
