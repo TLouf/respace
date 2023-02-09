@@ -162,6 +162,33 @@ class ResultSet:
         }
         return metadata
 
+    def set_compute_fun(self, res_name: str, compute_fun: Callable):
+        """Set the computing funtion for `res_name`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to set the computing function.
+        compute_fun : Callable
+            New computing function of `res_name` to set.
+        """
+        res_attrs = self[res_name].attrs
+        res_attrs["compute_fun"] = compute_fun
+        res_attrs["tracking_compute_fun"] = _tracking(self, res_name)(compute_fun)
+
+    def set_save_fun(self, res_name: str, save_fun: Callable):
+        """Set the computing funtion for `res_name`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to set the computing function.
+        save_fun : Callable
+            New saving function of `res_name` to set, taking the result instance and the
+            save path as respectively first and second arguments.
+        """
+        self[res_name].attrs["save_fun"] = save_fun
+
     def fill_with_defaults(self, params: dict) -> dict:
         return {**self.param_defaults, **params}
 
