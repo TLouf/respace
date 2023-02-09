@@ -198,7 +198,29 @@ class ResultSet:
         complete_param_set = self.fill_with_defaults(params)
         return self[res_name].loc[complete_param_set] >= 0
 
-    def compute(self, res_name, params: dict, **add_kwargs):
+    def compute(self, res_name: str, params: dict, **add_kwargs) -> Any:
+        """Compute result `res_name` for set of parameters `params`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result to compute.
+        params : dict
+            Dictionary of parameters for which to perform the computation.
+        **add_kwargs:
+            Additional keyword arguments to pass to `res_name`'s computing function,
+            like external data for instance.
+
+        Returns
+        -------
+        result value
+
+        Raises
+        ------
+        ValueError
+            If `params`  or `add_kwargs` contain one or more parameter that cannot be
+            accepted by `res_name`'s computing function.
+        """
         complete_param_set = self.fill_with_defaults(params)
         # Add other results to add_kwargs if necessary.
         argspec = inspect.getfullargspec(self[res_name].compute_fun)
