@@ -149,6 +149,19 @@ class ResultSet:
         }
         return d
 
+    @property
+    def results_metadata(self) -> dict[str, Callable]:
+        """Return a dictionary giving the metadata for all results."""
+        metadata = {
+            name: {
+                attr_name: attr_value
+                for attr_name, attr_value in self[name].attrs.items()
+                if attr_name not in ("computed_values", "compute_times")
+            }
+            for name in self.param_space.data_vars
+        }
+        return metadata
+
     def fill_with_defaults(self, params: dict) -> dict:
         return {**self.param_defaults, **params}
 
