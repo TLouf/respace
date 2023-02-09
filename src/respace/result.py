@@ -123,7 +123,14 @@ class ResultSet:
 
 
     @property
-    def params_values(self) -> dict:
+    def save_path_fmt(self):
+        """Return the save path format of the results."""
+        return self._save_path_fmt
+
+    @save_path_fmt.setter
+    def save_path_fmt(self, save_path_fmt: str | Path) -> None:
+        self._save_path_fmt = Path(save_path_fmt)
+
         return {
             param_name: param_values.data
             for param_name, param_values in self.coords.items()
