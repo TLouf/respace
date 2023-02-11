@@ -8,12 +8,14 @@ else:
     from importlib import metadata
 
 from respace.parameters import Parameter, ParameterSet
-from respace.result import ResultSet
+from respace.result import ResultMetadata, ResultSet, ResultSetMetadata
 
 __all__ = [
     "Parameter",
     "ParameterSet",
+    "ResultMetadata",
     "ResultSet",
+    "ResultSetMetadata",
 ]
 
 __version__ = metadata.version("respace")
