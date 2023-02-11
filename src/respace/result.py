@@ -1,27 +1,42 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Hashable, Iterator, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
 import xarray as xr
-from typing_extensions import Self
+from pandas import Index
 
-from respace._typing import ParamsType
 from respace.parameters import ParameterSet
 from respace.utils import _tracking, save_pickle
 
-xr.set_options(keep_attrs=True)
+if TYPE_CHECKING:
+    from collections.abc import Hashable, Iterator
+
+    from typing_extensions import Self
+    from xarray.core.coordinates import DatasetCoordinates
+
+    from respace._typing import (
+        ComputeFunType,
+        ParamsArgType,
+        ParamsMultValues,
+        ParamsSingleValue,
+        ParamsType,
+        ResultSetDict,
+        SaveFunType,
+    )
+
+
+xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
 
 
 @dataclass
 class ResultMetadata:
     name: str
-    compute_fun: Callable
-    save_fun: Callable = save_pickle
+    compute_fun: ComputeFunType
+    save_fun: SaveFunType = save_pickle
     save_suffix: str = ".pickle"
 
 
@@ -30,14 +45,16 @@ class ResultSetMetadata:
     results: list[ResultMetadata]
 
     @classmethod
-    def from_dict(cls, d: dict) -> Self:
+    def from_dict(cls, d: ResultSetDict) -> Self:
         # Keys are names
         results = []
         for name, metadata in d.items():
-            if not isinstance(metadata, dict):
-                # Then metadata is `compute_fun`.
-                metadata = {"compute_fun": metadata}
-            results.append(ResultMetadata(name, **metadata))
+            if isinstance(metadata, dict):
+                compute_fun = metadata.pop("compute_fun")
+            else:
+                compute_fun = metadata
+                metadata = {}
+            results.append(ResultMetadata(name, compute_fun, **metadata))
         return cls(results)
 
     def __iter__(self) -> Iterator[ResultMetadata]:
@@ -68,23 +85,15 @@ class ResultSet:
 
     Attributes
     ----------
-    param_space : xarray.Dataset
-        :class:`xarray.Dataset` which contains a :class:`xarray.DataArray` for each
-        result of the set. Its coordinates are the possible values of all parameters.
-        Its values are the indices where the result's computated values are stored in
-        the list "computed_values", which is accessible as one of the attributes of the
-        DataArray. The default value of -1 means the result has not been computed for
-        the corresponding set of parameters, and a new value shall be computed and
-        appended to "computed_values".
     save_path_fmt: Path
         Default format for the save path of results.
     """
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata | dict,
+        results_metadata: ResultSetMetadata | ResultSetDict,
         params: ParamsType,
-        attrs: dict | None = None,
+        attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
     ) -> None:
         params_set = params
@@ -131,7 +140,15 @@ class ResultSet:
     def _repr_html_(self) -> str:
         return self.param_space._repr_html_()
 
-    def __getitem__(self, r: Hashable | list[Hashable]):
+    @overload
+    def __getitem__(self, r: Hashable) -> xr.DataArray:
+        ...
+
+    @overload
+    def __getitem__(self, r: list[Hashable]) -> xr.Dataset:
+        ...
+
+    def __getitem__(self, r: Hashable | list[Hashable]) -> xr.DataArray | xr.Dataset:
         """Get the parameter space for one or a set of results.
 
         Parameters
@@ -147,21 +164,64 @@ class ResultSet:
         return self.param_space[r]
 
     @property
-    def attrs(self):
+    def param_space(self) -> xr.Dataset:
+        """Parameter space within which the results are computed.
+
+        Returns
+        -------
+        param_space : xr.Dataset
+            :class:`xarray.Dataset` which contains a :class:`xarray.DataArray` for each
+            result of the set. Its coordinates are the possible values of all
+            parameters. Its values are the indices where the result's computated values
+            are stored in the list "computed_values", which is accessible as one of the
+            attributes of the DataArray. The default value of -1 means the result has
+            not been computed for the corresponding set of parameters, and a new value
+            shall be computed and appended to "computed_values".
+        """
+        return self.__param_space
+
+    @param_space.setter
+    def param_space(self, param_space_: xr.Dataset) -> None:
+        """Setter for the parameter space.
+
+        Parameters
+        ----------
+        param_space_ : xr.Dataset
+            Parameter space to set.
+
+        Raises
+        ------
+        ValueError
+            If ``param_space_.data_vars`` contains a variable whose name is not a
+            string.
+        ValueError
+            If ``param_space_.coords`` contains a coordinate whose name is not a string.
+        """
+        for res_label in param_space_.data_vars:
+            if not isinstance(res_label, str):
+                raise ValueError("Result names should be strings.")
+
+        for param_label in param_space_.coords:
+            if not isinstance(param_label, str):
+                raise ValueError("Parameter names should be strings")
+        self.__param_space = param_space_
+
+    @property
+    def attrs(self) -> dict[str, Any]:
         """Return the attributes dictionary of the ResultSet."""
         return self.param_space.attrs
 
     @attrs.setter
-    def attrs(self, attrs_: dict) -> None:
+    def attrs(self, attrs_: dict[str, Any]) -> None:
         self.param_space.attrs = attrs_
 
     @property
-    def coords(self):
+    def coords(self) -> DatasetCoordinates:
         """Return the coordinates of the parameter space."""
         return self.param_space.coords
 
     @property
-    def save_path_fmt(self):
+    def save_path_fmt(self) -> Path:
         """Return the save path format of the results."""
         return self._save_path_fmt
 
@@ -170,70 +230,86 @@ class ResultSet:
         self._save_path_fmt = Path(save_path_fmt)
 
     @property
-    def params_values(self) -> dict[str, Sequence[Hashable]]:
+    def params_values(self) -> ParamsArgType:
         """Return a dictionary with the possible values of all parameters."""
+        # Type ignore below because don't know how to tell mypy we've locked coords so
+        # that parameter labels as returned here below can only be strings.
         return {
-            param_name: param_values.data
+            param_name: param_values.data  # type: ignore[misc]
             for param_name, param_values in self.coords.items()
         }
 
     @property
-    def param_defaults(self) -> dict[str, Hashable]:
+    def param_defaults(self) -> ParamsSingleValue:
         """Return a dictionary with the default values of all parameters."""
-        d = {
-            param_name: param_values.data[0]
+        # Type ignore below because don't know how to tell mypy we've locked coords so
+        # that parameter labels as returned here below can only be strings.
+        return {
+            param_name: param_values.data[0]  # type: ignore[misc]
             for param_name, param_values in self.coords.items()
         }
-        return d
 
     @property
-    def results_metadata(self) -> dict[str, Callable]:
+    def results_metadata(self) -> ResultSetDict:
         """Return a dictionary giving the metadata for all results."""
+        # Type ignore below because don't know how to tell mypy we've locked data_vars
+        # so that result labels as returned here below can only be strings.
         metadata = {
             name: {
                 attr_name: attr_value
                 for attr_name, attr_value in self[name].attrs.items()
-                if attr_name not in ("computed_values", "compute_times")
+                if attr_name in ("compute_fun", "save_fun", "save_suffix")
             }
             for name in self.param_space.data_vars
         }
-        return metadata
+        return metadata  # type: ignore[return-value]
 
-    def set_compute_fun(self, res_name: str, compute_fun: Callable):
+    def set_compute_fun(self, res_name: str, compute_fun: ComputeFunType) -> None:
         """Set the computing funtion for `res_name`.
 
         Parameters
         ----------
         res_name : str
             Name of the result for which to set the computing function.
-        compute_fun : Callable
+        compute_fun : ComputeFunType
             New computing function of `res_name` to set.
         """
         res_attrs = self[res_name].attrs
         res_attrs["compute_fun"] = compute_fun
         res_attrs["tracking_compute_fun"] = _tracking(self, res_name)(compute_fun)
 
-    def set_save_fun(self, res_name: str, save_fun: Callable):
+    def set_save_fun(self, res_name: str, save_fun: SaveFunType) -> None:
         """Set the computing funtion for `res_name`.
 
         Parameters
         ----------
         res_name : str
             Name of the result for which to set the computing function.
-        save_fun : Callable
+        save_fun : SaveFunType
             New saving function of `res_name` to set, taking the result instance and the
             save path as respectively first and second arguments.
         """
         self[res_name].attrs["save_fun"] = save_fun
 
-    def fill_with_defaults(self, params: dict) -> dict:
+    @overload
+    def fill_with_defaults(self, params: ParamsMultValues) -> ParamsMultValues:
+        ...
+
+    @overload
+    def fill_with_defaults(self, params: ParamsSingleValue) -> ParamsSingleValue:
+        ...
+
+    def fill_with_defaults(self, params: ParamsArgType) -> ParamsArgType:
+        """Fill `params` with the default values of the unspecified parameters."""
         return {**self.param_defaults, **params}
 
-    def is_computed(self, res_name, params: dict) -> bool:
+    def is_computed(self, res_name: str, params: ParamsArgType) -> xr.DataArray:
         complete_param_set = self.fill_with_defaults(params)
         return self[res_name].loc[complete_param_set] >= 0
 
-    def compute(self, res_name: str, params: dict, **add_kwargs) -> Any:
+    def compute(
+        self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
+    ) -> Any:
         """Compute result `res_name` for set of parameters `params`.
 
         Parameters
@@ -282,7 +358,9 @@ class ResultSet:
         self[res_name].loc[complete_param_set] = res_coord
         return result
 
-    def get(self, res_name: str, params: dict, **add_kwargs):
+    def get(
+        self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
+    ) -> Any:
         """Get the value of result `res_name` for set of parameters `params`.
 
         Parameters
@@ -314,9 +392,9 @@ class ResultSet:
     def save(
         self,
         res_name: str,
-        params: dict,
+        params: ParamsSingleValue,
         save_path_fmt: Path | str | None = None,
-        **add_kwargs,
+        **add_kwargs: dict[str, Any],
     ) -> Any:
         save_fun = self[res_name].attrs["save_fun"]
         save_path = self.get_save_path(res_name, params, save_path_fmt=save_path_fmt)
@@ -325,7 +403,10 @@ class ResultSet:
         return res_value
 
     def get_save_path(
-        self, res_name: str, params: dict, save_path_fmt: Path | str | None = None
+        self,
+        res_name: str,
+        params: ParamsSingleValue,
+        save_path_fmt: Path | str | None = None,
     ) -> Path:
         if save_path_fmt is None:
             save_path_fmt = str(self.save_path_fmt)
@@ -337,10 +418,12 @@ class ResultSet:
         save_suffix = self[res_name].attrs["save_suffix"]
         return save_path.with_suffix(save_suffix)
 
-    def get_nth_last_computed(self, res_name: str, n: int = 1):
+    def get_nth_last_computed(self, res_name: str, n: int = 1) -> Any:
         return self[res_name].attrs["computed_values"][-n]
 
-    def get_nth_last_details(self, res_name: str, n: int = 1):
+    def get_nth_last_details(
+        self, res_name: str, n: int = 1
+    ) -> tuple[Any, dict[Hashable, Hashable]]:
         value = self.get_nth_last_computed(res_name, n=n)
         params_idc = np.nonzero(
             self[res_name].param_space.data
@@ -351,37 +434,56 @@ class ResultSet:
             params[d] = self.coords[d].data[params_idc[i]][0]
         return value, params
 
-    def add_param_values(self, values: dict):
-        self.param_space = self.param_space.reindex(
-            {p: np.union1d(v, self.coords[p].values) for p, v in values.items()},
-            fill_value=-1,
-        ).copy()
+    def add_param_values(self, values: ParamsArgType) -> None:
+        # TODO docstring
+        reindex_dict = {}
+        for p, v in values.items():
+            collec = [v] if isinstance(v, Hashable) else v
+            reindex_dict[p] = self.param_space.get_index(p).union(Index(collec))
 
-    def add_params(self, params: ParamsType):
-        params_set = params
-        if not isinstance(params_set, ParameterSet):
-            params_set = ParameterSet(params_set)
+        self.param_space = self.param_space.reindex(reindex_dict, fill_value=-1).copy()
 
-        # always add so that .dims is ordered!
+    def add_params(self, params: ParamsType) -> None:
+        """Add new parameters to the set.
+
+        Parameter dimensions are always added in such a way that param_space.dims is
+        ordered.
+
+        Parameters
+        ----------
+        params : ParamsType
+            Parameters to add.
+        """
+        if isinstance(params, ParameterSet):
+            params_set = params
+        else:
+            params_set = ParameterSet(params)
+        # Type ignore below because don't know how to tell mypy we've locked coords so
+        # that parameter labels as returned here below can only be strings.
         curr_dims = list(self.param_space.coords.keys())
         add_dims = np.asarray([p.name for p in params_set])
         add_dims_sorting = np.argsort(add_dims)
-        # this works because curr_dims is assumed always sorted
+        # This works because curr_dims is assumed always sorted
         axis_of_sorted_added_dims = np.searchsorted(
-            curr_dims, add_dims[add_dims_sorting]
+            curr_dims, add_dims[add_dims_sorting]  # type: ignore[arg-type]
         ) + np.arange(add_dims.size)
         axis = axis_of_sorted_added_dims[add_dims_sorting].tolist()
         params_dict = params_set.to_dict()
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
 
-    def populated_mask(self):
+    # TODO: add_result
+    @property
+    def populated_mask(self) -> xr.Dataset:
         return self.param_space >= 0
 
-    def populated_space(self):
-        return np.where(self.populated_mask, drop=True)
+    @property
+    def populated_space(self) -> xr.Dataset:
+        return self.param_space.where(self.populated_mask, drop=True)
 
     def get_subspace_res(
-        self, subspace_params: dict, keep_others_default_only: bool = False
+        self,
+        subspace_params: ParamsArgType,
+        keep_others_default_only: bool = False,
     ) -> ResultSet:
         """Return the subset of the result set for the given parameter values.
 

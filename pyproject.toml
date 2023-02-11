@@ -16,7 +16,7 @@ classifiers = [
 Changelog = "https://github.com/TLouf/respace/releases"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.12"
 xarray = ">=2023.01.0"
 
 [tool.poetry.group.test.dependencies]
@@ -34,6 +34,7 @@ ruff = ">= 0.0.237"
 
 [tool.poetry.group.typing.dependencies]
 mypy = ">=1.0.0"
+pandas-stubs = ">=1.5.3.230203"
 typing-extensions = ">=4.4.0"
 
 [tool.poetry.group.docs.dependencies]

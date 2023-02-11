@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Hashable, Iterator
+from collections.abc import Hashable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from respace._typing import ParamsDictType
+    from respace._typing import ParamsArgType
 
 
 @dataclass
@@ -56,13 +56,12 @@ class ParameterSet:
         Sorted list of `Parameter` instances.
     """
 
-    def __init__(self, parameters: list[Parameter] | ParamsDictType) -> None:
-        if isinstance(parameters, dict):
+    def __init__(self, parameters: Iterable[Parameter] | ParamsArgType) -> None:
+        if isinstance(parameters, Mapping):
             parameters = [
                 Parameter(key, v)
                 if isinstance(v, Hashable)
-                else Parameter(key, v[0], v)  # type: ignore[index,arg-type]
-                # mypy is just wrong here
+                else Parameter(key, v[0], v)
                 for key, v in parameters.items()
             ]
         self.parameters = sorted(parameters, key=lambda p: p.name)

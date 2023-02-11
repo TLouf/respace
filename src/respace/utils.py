@@ -3,16 +3,22 @@ from __future__ import annotations
 import inspect
 import pickle
 import time
-from collections.abc import Hashable
 from functools import wraps
-from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Concatenate, TypeVar
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from typing_extensions import ParamSpec
+
     from respace.result import ResultSet
 
+    R = TypeVar("R")
+    P = ParamSpec("P")
 
-def save_pickle(object: Any, save_path: Path):
+
+def save_pickle(object: Any, save_path: Path) -> None:
     """Save `object` to pickle format at `save_path`.
 
     Parameters
@@ -28,10 +34,10 @@ def save_pickle(object: Any, save_path: Path):
 
 def _tracking(
     result_set: ResultSet,
-    res_name: Hashable,
+    res_name: str,
     timed: bool = True,
     append_values: bool = True,
-):
+) -> Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]:
     """Decorate the function to compute a result in a `ResultSet` to track its outputs.
 
     Parameters
@@ -50,9 +56,13 @@ def _tracking(
         True.
     """
 
-    def decorator_compute(compute_fun):
+    def decorator_compute(
+        compute_fun: Callable[P, R]
+    ) -> Callable[Concatenate[Any, P], R]:
         @wraps(compute_fun)
-        def wrapper_compute(*args, **kwargs):
+        # TODO: way to annotate type of kwargs as superset of P.kwargs? to remove
+        # type ignore below.
+        def wrapper_compute(*args: P.args, **kwargs: P.kwargs) -> R:
             argspec = inspect.getfullargspec(result_set[res_name].compute_fun)
             possible_kwds = argspec.args + argspec.kwonlyargs
             fun_kwargs = {
@@ -60,7 +70,7 @@ def _tracking(
             }
             if timed:
                 start = time.time()
-            result = compute_fun(*args, **fun_kwargs)
+            result = compute_fun(*args, **fun_kwargs)  # type: ignore[arg-type]
             if timed:
                 end = time.time()
                 result_set[res_name].attrs["compute_times"].append(end - start)
