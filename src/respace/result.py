@@ -82,7 +82,7 @@ class ResultSetMetadata:
         ----------
         d : ResultsMetadataDictType
             The dictionary's keys should be the results' names, and  its values should
-            either be a `compute_fun`, or a dictionary giving at least a `compute_fun`
+            either be a `compute_fun`, or a dictionary giving at least a `"compute_fun"`
             and any of the other ResultMetadata attributes.
 
         Returns
@@ -109,9 +109,9 @@ class ResultSet:
     Parameters
     ----------
     results_metadata : ResultSetMetadata | dict
-        :class:`respace.ResultMetadata`, or dictionary that at least gives the result
-        names (keys) and the functions to call to compute them (values), or dictionary
-        of dictionaries giving keys as in :class:`respace.ResultMetadata`.
+        :class:`ResultSetMetadata` instance or dictionary describing the results to add.
+        See :meth:`ResultSetMetadata.from_dict` for more information on the dictionary
+        format.
     params : ParamsType
         by definitions then, parameters need be of consistent type, and be Hashable
         (because DataArray coordinates are based on :class:`pandas.Index` (ref
@@ -503,6 +503,29 @@ class ResultSet:
         axis = axis_of_sorted_added_dims[add_dims_sorting].tolist()
         params_dict = params_set.to_dict()
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
+
+    def add_results(
+        self,
+        results_metadata: ResultSetMetadata | ResultsMetadataDictType,
+    ) -> None:
+        """Add new results to the set.
+
+        Parameters
+        ----------
+        results_metadata : ResultSetMetadata | ResultsMetadataDictType
+            :class:`ResultSetMetadata` instance or dictionary describing the results to
+            add. See :meth:`ResultSetMetadata.from_dict` for more information on the
+            dictionary format.
+        """
+        if not isinstance(results_metadata, ResultSetMetadata):
+            results_metadata = ResultSetMetadata.from_dict(results_metadata)
+
+        dims = list(self.coords)
+        data = -np.ones([len(v.values) for v in self.coords.values()], dtype="int")
+        add_data_vars = {
+            r.name: self._make_res_var(r, dims, data) for r in results_metadata
+        }
+        self.param_space = self.param_space.assign(variables=add_data_vars)
 
     def _make_res_var(
         self, res: ResultMetadata, dims: Sequence[Hashable], data: npt.NDArray[np.int_]
