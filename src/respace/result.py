@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
         SaveFunType,
     )
 
+    import numpy.typing as npt
 
 xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
 
@@ -106,17 +108,7 @@ class ResultSet:
         dims = [p.name for p in params_set]
         data = -np.ones([len(p.values) for p in params_set], dtype="int")
         data_vars = {
-            r.name: xr.Variable(
-                dims,
-                data,
-                attrs={
-                    "tracking_compute_fun": _tracking(self, r.name)(r.compute_fun),
-                    "computed_values": [],
-                    "compute_times": [],
-                    **asdict(r),
-                },
-            )  # type: ignore[no-untyped-call]
-            for r in results_metadata
+            r.name: self._make_res_var(r, dims, data) for r in results_metadata
         }
         params_dict = params_set.to_dict()
         self.param_space = xr.Dataset(
@@ -473,7 +465,20 @@ class ResultSet:
         params_dict = params_set.to_dict()
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
 
-    # TODO: add_result
+    def _make_res_var(
+        self, res: ResultMetadata, dims: Sequence[Hashable], data: npt.NDArray[np.int_]
+    ) -> xr.Variable:
+        return xr.Variable(
+            dims,
+            data,
+            attrs={
+                "tracking_compute_fun": _tracking(self, res.name)(res.compute_fun),
+                "computed_values": [],
+                "compute_times": [],
+                **asdict(res),
+            },
+        )  # type: ignore[no-untyped-call]
+
     @property
     def populated_mask(self) -> xr.Dataset:
         return self.param_space >= 0
