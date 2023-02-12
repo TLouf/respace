@@ -49,7 +49,7 @@ class ResultMetadata:
     save_suffix : str
         Suffix of the file where the result would be saved. Should be set to match what's expected by to `save_fun`. Default is ".pickle"
     save_path_fmt : str, optional
-        Default format for the save path of the result. Will be formatted with the
+        Default format for the path where to save the result. Will be formatted with the
         :meth:`str.format` method. If not set, :class:`respace.ResultSet`'s default will
         be used. Good practice is to include the name of the result and the parameters'
         with format fields for their values.
@@ -119,7 +119,7 @@ class ResultSet:
     attrs : dict, optional
         Global attributes to save on this result set.
     save_path_fmt : str | Path, optional
-        Default format for the save path of results. Will be formatted with the
+        Default format for the path where to save the results. Will be formatted with the
         :meth:`str.format` method, with a dictionary mapping "res_name" and the names of
         all parameters in the set to respectively the name of the result being saved and
         the value of the parameters. The default is
@@ -127,8 +127,8 @@ class ResultSet:
 
     Attributes
     ----------
-    save_path_fmt: str
-        Default format for the save path of results.
+    save_path_fmt : str
+        Default format for the path where to save the results.
     """
 
     def __init__(
@@ -254,7 +254,7 @@ class ResultSet:
 
     @property
     def save_path_fmt(self) -> str:
-        """Return the save path format of the results."""
+        """Return the default format for the path where to save the results."""
         return self._save_path_fmt
 
     @save_path_fmt.setter
@@ -348,15 +348,15 @@ class ResultSet:
         ----------
         res_name : str
             Name of the result to compute.
-        params : dict
+        params : ParamsSingleValue
             Dictionary of parameters for which to perform the computation.
-        **add_kwargs:
+        **add_kwargs : dict[str, Any]
             Additional keyword arguments to pass to `res_name`'s computing function,
             like external data for instance.
 
         Returns
         -------
-        result value
+        result value : Any
 
         Raises
         ------
@@ -395,19 +395,21 @@ class ResultSet:
     ) -> Any:
         """Get the value of result `res_name` for set of parameters `params`.
 
+        If it has not been computed yet, it will be computed before returning the value.
+
         Parameters
         ----------
         res_name : str
             Name of the result to get.
-        params : dict
+        params : ParamsSingleValue
             Dictionary of parameters for which to get the result.
-        **add_kwargs:
+        **add_kwargs : dict[str, Any]
             Additional keyword arguments to pass to `res_name`'s computing function,
             like external data for instance.
 
         Returns
         -------
-        result value
+        result value : Any
         """
         complete_param_set = self.fill_with_defaults(params)
         try:
