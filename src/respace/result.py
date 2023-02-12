@@ -232,7 +232,7 @@ class ResultSet:
         }
 
     @property
-    def param_defaults(self) -> ParamsSingleValue:
+    def params_defaults(self) -> ParamsSingleValue:
         """Return a dictionary with the default values of all parameters."""
         # Type ignore below because don't know how to tell mypy we've locked coords so
         # that parameter labels as returned here below can only be strings.
@@ -293,7 +293,7 @@ class ResultSet:
 
     def fill_with_defaults(self, params: ParamsArgType) -> ParamsArgType:
         """Fill `params` with the default values of the unspecified parameters."""
-        return {**self.param_defaults, **params}
+        return {**self.params_defaults, **params}
 
     def is_computed(self, res_name: str, params: ParamsArgType) -> xr.DataArray:
         complete_param_set = self.fill_with_defaults(params)
