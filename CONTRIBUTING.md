@@ -39,24 +39,30 @@ Request features on the [Issue Tracker].
 
 You need Python 3.8+ and the following tools:
 
+- [git]
 - [Poetry]
 - [Nox]
 - [nox-poetry]
 
-Install the package with development requirements:
+Then, fork the repository on GitHub and clone the fork:
+
+```console
+$ git clone https://github.com/<username>/respace.git
+```
+
+Once in ReSpace's directory, you can install the package with development requirements:
 
 ```console
 $ poetry install
 ```
 
-You can now run an interactive Python session,
-or the command-line interface:
+You can now run an interactive Python session:
 
 ```console
 $ poetry run python
-$ poetry run respace
 ```
 
+[git]: https://git-scm.com/
 [poetry]: https://python-poetry.org/
 [nox]: https://nox.thea.codes/
 [nox-poetry]: https://nox-poetry.readthedocs.io/
