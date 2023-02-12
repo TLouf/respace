@@ -181,7 +181,7 @@ class ResultSet:
         ...
 
     def __getitem__(self, r: Hashable | list[Hashable]) -> xr.DataArray | xr.Dataset:
-        """Get the parameter space for one or a set of results.
+        """Get the parameter space for one or a set of the results.
 
         Parameters
         ----------
