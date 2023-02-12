@@ -19,20 +19,37 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx_copybutton",
-    "myst_parser",
+    "myst_nb",
+    "hoverxref.extension",
 ]
-autodoc_typehints = "description"
 
-autosummary_generate = True
+python_use_unqualified_type_names = True
+autodoc_typehints_format = "short"
+numpydoc_show_class_members = False
+
+hoverxref_auto_ref = True
+hoverxref_domains = ["py"]
+hoverxref_role_types = dict.fromkeys(
+    ["ref", "class", "func", "meth", "attr", "exc", "data", "obj"],
+    "tooltip",
+)
+hoverxref_tooltip_lazy = True
+# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
+hoverxref_intersphinx = [
+    "python",
+    "xarray",
+]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "xarray": ("https://docs.xarray.dev/en/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+}
 
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "github_url": "https://github.com/TLouf/respace",
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
-}
-
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
 }
 
 

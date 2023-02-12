@@ -26,3 +26,4 @@ ENV/
 
 # Documentation
 docs/source/reference/api
+docs/jupyter_execute
