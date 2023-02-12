@@ -23,3 +23,6 @@ ENV/
 
 # IDE settings
 .vscode/
+
+# Documentation
+docs/source/reference/api
