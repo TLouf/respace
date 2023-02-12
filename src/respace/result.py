@@ -428,6 +428,28 @@ class ResultSet:
         save_path_fmt: Path | str | None = None,
         **add_kwargs: dict[str, Any],
     ) -> Any:
+        """Save the value of result `res_name` for set of parameters `params`.
+
+        If it has not been computed yet, it will be computed before saving the value.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result to save.
+        params : ParamsSingleValue
+            Dictionary of parameters for which to save the result.
+        save_path_fmt : Path | str | None, optional
+            Format for the path where to save the result. If not set, will be the
+            result's default `save_path_fmt`, or, if not set, the global
+            :attr:`ResultSet.save_path_fmt`.
+        **add_kwargs : dict[str, Any]
+            Additional keyword arguments to pass to `res_name`'s computing function,
+            like external data for instance.
+
+        Returns
+        -------
+        result value : Any
+        """
         save_fun = self[res_name].attrs["save_fun"]
         save_path = self.get_save_path(res_name, params, save_path_fmt=save_path_fmt)
         res_value = self.get(res_name, params, **add_kwargs)
