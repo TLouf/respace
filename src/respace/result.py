@@ -10,26 +10,26 @@ import numpy as np
 import xarray as xr
 from pandas import Index
 
+# Has to be outside of `if TYPE_CHECKING` for sphinx autodoc to pick them up
+from respace._typing import (
+    ComputeFunType,
+    ParamsArgType,
+    ParamsMultValues,
+    ParamsSingleValue,
+    ParamsType,
+    ResultSetDict,
+    ResultsMetadataDictType,
+    SaveFunType,
+)
 from respace.parameters import ParameterSet
 from respace.utils import _tracking, save_pickle
 
 if TYPE_CHECKING:
     from collections.abc import Hashable, Iterator
 
+    import numpy.typing as npt
     from typing_extensions import Self
     from xarray.core.coordinates import DatasetCoordinates
-
-    from respace._typing import (
-        ComputeFunType,
-        ParamsArgType,
-        ParamsMultValues,
-        ParamsSingleValue,
-        ParamsType,
-        ResultSetDict,
-        SaveFunType,
-    )
-
-    import numpy.typing as npt
 
 xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
 
@@ -48,16 +48,15 @@ class ResultSetMetadata:
     results: list[ResultMetadata]
 
     @classmethod
-    def from_dict(cls, d: ResultSetDict) -> Self:
+    def from_dict(cls, d: ResultsMetadataDictType) -> Self:
         # Keys are names
         results = []
         for name, metadata in d.items():
-            if isinstance(metadata, dict):
-                compute_fun = metadata.pop("compute_fun")
-            else:
+            if callable(metadata):
                 compute_fun = metadata
-                metadata = {}
-            results.append(ResultMetadata(name, compute_fun, **metadata))
+                results.append(ResultMetadata(name, compute_fun))
+            else:
+                results.append(ResultMetadata(name, **metadata))
         return cls(results)
 
     def __iter__(self) -> Iterator[ResultMetadata]:
@@ -94,7 +93,7 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata | ResultSetDict,
+        results_metadata: ResultSetMetadata | ResultsMetadataDictType,
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
@@ -102,7 +101,7 @@ class ResultSet:
         params_set = params
         if not isinstance(params_set, ParameterSet):
             params_set = ParameterSet(params_set)
-        if isinstance(results_metadata, dict):
+        if not isinstance(results_metadata, ResultSetMetadata):
             results_metadata = ResultSetMetadata.from_dict(results_metadata)
 
         dims = [p.name for p in params_set]
@@ -243,7 +242,7 @@ class ResultSet:
         }
 
     @property
-    def results_metadata(self) -> ResultSetDict:
+    def results_metadata(self) -> dict[str, ResultSetDict]:
         """Return a dictionary giving the metadata for all results."""
         # Type ignore below because don't know how to tell mypy we've locked data_vars
         # so that result labels as returned here below can only be strings.

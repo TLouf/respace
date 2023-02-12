@@ -3,10 +3,8 @@ from __future__ import annotations
 import contextlib
 from collections.abc import Hashable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from respace._typing import ParamsArgType
+from respace._typing import ParamsArgType
 
 
 @dataclass
@@ -45,7 +43,7 @@ class ParameterSet:
 
     Parameters
     ----------
-    parameters : list[Parameter] | dict
+    parameters : list[Parameter] | ParamsArgType
         Input list of `Parameter` instancess, or dictionary whose keys are parameter
         names, and whose values are either a single value, which will be the
         default, or a sequence of values, the first of which will be the default.

@@ -112,6 +112,9 @@ multiline-quotes = "double"
 [tool.ruff.flake8-tidy-imports]
 ban-relative-imports = "all"
 
+[tool.ruff.per-file-ignores]
+"_typing.py" = ["UP007"]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
