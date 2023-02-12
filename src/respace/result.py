@@ -36,6 +36,25 @@ xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
 
 @dataclass
 class ResultMetadata:
+    """Represent a result with a mandatory name and computing function.
+
+    Attributes
+    ----------
+    name : str
+        Name of the result.
+    compute_fun : ComputeFunType
+        Function to call to compute the result.
+    save_fun : SaveFunType, default :func:`respace.save_pickle`
+        Function to call to save the result. Its first argument should be the value of the result to save, and the second the path where to save it.
+    save_suffix : str
+        Suffix of the file where the result would be saved. Should be set to match what's expected by to `save_fun`. Default is ".pickle"
+    save_path_fmt : str, optional
+        Default format for the save path of the result. Will be formatted with the
+        :meth:`str.format` method. If not set, :class:`respace.ResultSet`'s default will
+        be used. Good practice is to include the name of the result and the parameters'
+        with format fields for their values.
+    """
+
     name: str
     compute_fun: ComputeFunType
     save_fun: SaveFunType = save_pickle
@@ -45,10 +64,31 @@ class ResultMetadata:
 
 @dataclass
 class ResultSetMetadata:
+    """Represent a set of results with a mandatory name and computing function.
+
+    Attributes
+    ----------
+    results : list[ResultMetadata]
+        List of :class:`respace.ResultMetadata` instances.
+    """
+
     results: list[ResultMetadata]
 
     @classmethod
     def from_dict(cls, d: ResultsMetadataDictType) -> Self:
+        """Construct ResultSetMetadata from dict describing one or several ResultMetadata.
+
+        Parameters
+        ----------
+        d : ResultsMetadataDictType
+            The dictionary's keys should be the results' names, and  its values should
+            either be a `compute_fun`, or a dictionary giving at least a `compute_fun`
+            and any of the other ResultMetadata attributes.
+
+        Returns
+        -------
+        Self
+        """
         # Keys are names
         results = []
         for name, metadata in d.items():
