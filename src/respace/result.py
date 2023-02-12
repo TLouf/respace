@@ -38,6 +38,7 @@ class ResultMetadata:
     compute_fun: ComputeFunType
     save_fun: SaveFunType = save_pickle
     save_suffix: str = ".pickle"
+    save_path_fmt: str | None = None
 
 
 @dataclass
@@ -85,7 +86,7 @@ class ResultSet:
 
     Attributes
     ----------
-    save_path_fmt: Path
+    save_path_fmt: str
         Default format for the save path of results.
     """
 
@@ -127,8 +128,8 @@ class ResultSet:
             save_path_fmt = "_".join(
                 ["{res_name}"] + [f"{p}={{p}}" for p in params_dict]
             )
-        if isinstance(save_path_fmt, str):
-            save_path_fmt = Path(save_path_fmt)
+        if isinstance(save_path_fmt, Path):
+            save_path_fmt = str(save_path_fmt)
         self.save_path_fmt = save_path_fmt
 
     def __str__(self) -> str:
@@ -221,13 +222,13 @@ class ResultSet:
         return self.param_space.coords
 
     @property
-    def save_path_fmt(self) -> Path:
+    def save_path_fmt(self) -> str:
         """Return the save path format of the results."""
         return self._save_path_fmt
 
     @save_path_fmt.setter
     def save_path_fmt(self, save_path_fmt: str | Path) -> None:
-        self._save_path_fmt = Path(save_path_fmt)
+        self._save_path_fmt = str(save_path_fmt)
 
     @property
     def params_values(self) -> ParamsArgType:
@@ -409,10 +410,11 @@ class ResultSet:
         save_path_fmt: Path | str | None = None,
     ) -> Path:
         if save_path_fmt is None:
-            save_path_fmt = str(self.save_path_fmt)
-        else:
-            save_path_fmt = str(save_path_fmt)
+            save_path_fmt = self[res_name].attrs.get(
+                "save_path_fmt", self.save_path_fmt
+            )
 
+        save_path_fmt = str(save_path_fmt)
         complete_param_set = self.fill_with_defaults(params)
         save_path = Path(save_path_fmt.format(res_name=res_name, **complete_param_set))
         save_suffix = self[res_name].attrs["save_suffix"]
