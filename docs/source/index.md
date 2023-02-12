@@ -4,8 +4,8 @@ end-before: <!-- github-only -->
 ---
 ```
 
-[license page]: license
-[contributor guide]: contributing
+[license page]: development/license
+[contributor guide]: development/contributing
 
 ```{toctree}
 ---
@@ -13,9 +13,8 @@ hidden:
 maxdepth: 1
 ---
 
-reference
-contributing
-Code of Conduct <codeofconduct>
-License <license>
-Changelog <https://github.com/TLouf/respace/releases>
+getting_started/index
+reference/index
+development/index
+Release notes <https://github.com/TLouf/respace/releases>
 ```
