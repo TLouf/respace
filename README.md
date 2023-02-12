@@ -1,3 +1,5 @@
+<div align="center">
+
 # ReSpace
 
 [![PyPI](https://img.shields.io/pypi/v/respace.svg)][pypi status]
@@ -20,21 +22,48 @@
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
+</div>
+
+ReSpace is a Python package that allows you to keep track of the results of different
+computations along with the parameter values that generated them. You specify their
+names, the function that generates them, the name and default values of the parameters
+they depend on and you're good to go: no more trying to remember what parameters this
+value was computed for, building dictionaries of dictionaries (of dictionaries) to
+store them, or generally worrying about these things.
+
+
 ## Features
 
-- TODO
+- Compute and store some result, indexing it based on the values of the parameters
+  it was computed for.
+- Compute results that depend on others reliably and easily.
+- Retrieve a previously computed result for a set of parameters.
+- Add new parameters seemlessly.
+- Handle parameter defaults.
+- Save your results at different paths depending on the set of parameters they were
+  computed for, with little to no effort.
 
-## Requirements
-
-- TODO
 
 ## Installation
 
-You can install _ReSpace_ via [pip] from [PyPI]:
+You can install the latest release of ReSpace via [pip] from [PyPI]:
 
 ```console
 $ pip install respace
 ```
+
+Or, if you want the latest development version from GitHub with [git]:
+
+```console
+$ pip install git+https://github.com/TLouf/respace
+```
+
+ReSpace requires Python 3.8+ and depends on the [xarray] library.
+
+[git]: https://git-scm.com/
+[pip]: https://pip.pypa.io/
+[pypi]: https://pypi.org/
+[xarray]: https://docs.xarray.dev/en/stable/
 
 ## Contributing
 
@@ -55,11 +84,10 @@ please [file an issue] along with a detailed description.
 
 This project was generated from a fork of [@cjolowicz]'s [Hypermodern Python Cookiecutter] template.
 
+<!-- urls -->
 [@cjolowicz]: https://github.com/cjolowicz
-[pypi]: https://pypi.org/
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
 [file an issue]: https://github.com/TLouf/respace/issues
-[pip]: https://pip.pypa.io/
 
 <!-- github-only -->
 [license page]: https://github.com/TLouf/respace/blob/main/LICENSE
