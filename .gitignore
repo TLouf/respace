@@ -26,4 +26,5 @@ ENV/
 
 # Documentation
 docs/source/reference/api
+docs/source/getting_started/*.pickle
 docs/jupyter_execute
