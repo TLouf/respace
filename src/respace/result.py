@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
@@ -135,7 +135,7 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata | ResultsMetadataDictType,
+        results_metadata: ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType,
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
@@ -144,7 +144,7 @@ class ResultSet:
         params_set = params
         if not isinstance(params_set, ParameterSet):
             params_set = ParameterSet(params_set)
-        if not isinstance(results_metadata, ResultSetMetadata):
+        if isinstance(results_metadata, Mapping):
             results_metadata = ResultSetMetadata.from_dict(results_metadata)
 
         dims = [p.name for p in params_set]
@@ -584,7 +584,7 @@ class ResultSet:
 
     def add_results(
         self,
-        results_metadata: ResultSetMetadata | ResultsMetadataDictType,
+        results_metadata: ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType,
     ) -> None:
         """Add new results to the set.
 
@@ -595,7 +595,7 @@ class ResultSet:
             add. See :meth:`ResultSetMetadata.from_dict` for more information on the
             dictionary format.
         """
-        if not isinstance(results_metadata, ResultSetMetadata):
+        if isinstance(results_metadata, Mapping):
             results_metadata = ResultSetMetadata.from_dict(results_metadata)
 
         dims = list(self.coords)
