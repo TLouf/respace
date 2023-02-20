@@ -54,7 +54,9 @@ class ParameterSet:
         Sorted list of `Parameter` instances.
     """
 
-    def __init__(self, parameters: Iterable[Parameter] | ParamsArgType) -> None:
+    def __init__(
+        self, parameters: Parameter | Iterable[Parameter] | ParamsArgType
+    ) -> None:
         if isinstance(parameters, Mapping):
             parameters = [
                 Parameter(key, v)
@@ -62,6 +64,8 @@ class ParameterSet:
                 else Parameter(key, v[0], v)
                 for key, v in parameters.items()
             ]
+        elif isinstance(parameters, Parameter):
+            parameters = [parameters]
         self.parameters = sorted(parameters, key=lambda p: p.name)
 
     def __iter__(self) -> Iterator[Parameter]:
