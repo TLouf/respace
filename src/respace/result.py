@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Hashable, Iterator, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
@@ -13,6 +13,7 @@ from pandas import Index
 # Has to be outside of `if TYPE_CHECKING` for sphinx autodoc to pick them up
 from respace._typing import (
     ComputeFunType,
+    LoadFunType,
     ParamsArgType,
     ParamsMultValues,
     ParamsSingleValue,
@@ -22,11 +23,9 @@ from respace._typing import (
     SaveFunType,
 )
 from respace.parameters import ParameterSet
-from respace.utils import _tracking, save_pickle
+from respace.utils import _tracking, load_pickle, save_pickle
 
 if TYPE_CHECKING:
-    from collections.abc import Hashable, Iterator
-
     import numpy.typing as npt
     from typing_extensions import Self
     from xarray.core.coordinates import DatasetCoordinates
@@ -58,6 +57,7 @@ class ResultMetadata:
     name: str
     compute_fun: ComputeFunType
     save_fun: SaveFunType = save_pickle
+    load_fun: LoadFunType = load_pickle
     save_suffix: str = ".pickle"
     save_path_fmt: str | None = None
 
@@ -103,6 +103,7 @@ class ResultSetMetadata:
         return iter(self.results)
 
 
+# TODO: does allowing method chaining and not inplace operations make sense?
 class ResultSet:
     """Hold a set of results within their parameter space.
 
@@ -113,6 +114,7 @@ class ResultSet:
         See :meth:`ResultSetMetadata.from_dict` for more information on the dictionary
         format.
     params : ParamsType
+        TODO
         by definitions then, parameters need be of consistent type, and be Hashable
         (because DataArray coordinates are based on :class:`pandas.Index` (ref
         https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dimension-coordinate)
@@ -135,7 +137,9 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType,
+        results_metadata: ResultSetMetadata
+        | list[ResultMetadata]
+        | ResultsMetadataDictType,
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
@@ -522,6 +526,21 @@ class ResultSet:
         save_suffix = self[res_name].attrs["save_suffix"]
         return save_path.with_suffix(save_suffix)
 
+    def load(
+        self,
+        res_name: str,
+        params: ParamsSingleValue | None = None,
+        save_path: Path | str | None = None,
+        save_path_fmt: Path | str | None = None,
+    ) -> Any:
+        if save_path is None:
+            if params is None:
+                raise ValueError("Specify either `save_path` or `params`.")
+            save_path = self.get_save_path(res_name, params, save_path_fmt)
+        load_fun = self[res_name].attrs["load_fun"]
+        res = load_fun(save_path)
+        return res
+
     def get_nth_last_computed(self, res_name: str, n: int = 1) -> Any:
         return self[res_name].attrs["computed_values"][-n]
 
@@ -584,7 +603,9 @@ class ResultSet:
 
     def add_results(
         self,
-        results_metadata: ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType,
+        results_metadata: ResultSetMetadata
+        | list[ResultMetadata]
+        | ResultsMetadataDictType,
     ) -> None:
         """Add new results to the set.
 

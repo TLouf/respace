@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
 
 
-def save_pickle(object: Any, save_path: Path) -> None:
+def save_pickle(object: Any, save_path: Path | str) -> None:
     """Save `object` to pickle format at `save_path`.
 
     Parameters
@@ -30,6 +30,19 @@ def save_pickle(object: Any, save_path: Path) -> None:
     """
     with open(save_path, "wb") as f:
         pickle.dump(object, f)
+
+
+def load_pickle(save_path: Path | str) -> Any:
+    """Load `object` from file in pickle format at `save_path`.
+
+    Parameters
+    ----------
+    save_path : Path
+        Path where to load the object from.
+    """
+    with open(save_path, "rb") as f:
+        object = pickle.load(f)
+    return object
 
 
 def _tracking(

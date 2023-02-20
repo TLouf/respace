@@ -14,19 +14,17 @@ if TYPE_CHECKING:
 ParamsSingleValue = Mapping[str, Hashable]
 ParamsMultValues = Mapping[str, Sequence[Hashable]]
 ParamsArgType = Mapping[str, Hashable | Sequence[Hashable]]
-ParamsType = Union[list["Parameter"], ParamsArgType, "ParameterSet"]
+ParamsType = Union["Parameter", list["Parameter"], ParamsArgType, "ParameterSet"]
 
 ComputeFunType = Callable[..., Any]
-SaveFunType = Union[
-    Callable[[Any, Path], None],
-    Callable[[Any, str], None],
-    Callable[[Any, Path | str], None],
-]  # TODO: better way to do this?
+SaveFunType = Callable[[Any, Path | str], Any]
+LoadFunType = Callable[[Path | str], Any]
 
 
 class ResultSetDict(TypedDict, total=False):
     compute_fun: Required[ComputeFunType]
     save_fun: SaveFunType
+    load_fun: LoadFunType
     save_suffix: str
     save_path_fmt: str
 
