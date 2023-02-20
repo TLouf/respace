@@ -197,7 +197,7 @@ class ResultSet:
         return self.param_space[r]
 
     @property
-    def verbose_print(self) -> Callable[..., None]:
+    def _verbose_print(self) -> Callable[..., None]:
         if self.verbose:
             return print
         else:
@@ -380,7 +380,7 @@ class ResultSet:
             accepted by `res_name`'s computing function.
         """
         complete_param_set = self.fill_with_defaults(params)
-        self.verbose_print(
+        self._verbose_print(
             f"Computing {res_name} for the following parameter values:\n{complete_param_set}"
         )
         # Add other results to add_kwargs if necessary.
@@ -505,7 +505,7 @@ class ResultSet:
         save_fun = self[res_name].attrs["save_fun"]
         save_path = self.get_save_path(res_name, params, save_path_fmt=save_path_fmt)
         res_value = self.get(res_name, params, **add_kwargs)
-        self.verbose_print(f"Saving {res_name} at {save_path}.")
+        self._verbose_print(f"Saving {res_name} at {save_path}.")
         save_fun(res_value, save_path)
         return res_value
 
