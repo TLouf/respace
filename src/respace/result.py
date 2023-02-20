@@ -404,6 +404,13 @@ class ResultSet:
         self[res_name].loc[complete_param_set] = res_coord
         return result
 
+    def _post_compute(
+        self, res_name: str, complete_param_set: ParamsSingleValue
+    ) -> None:
+        self.add_param_values(complete_param_set)
+        res_coord = len(self[res_name].attrs["computed_values"]) - 1
+        self[res_name].loc[complete_param_set] = res_coord
+
     def get(
         self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
     ) -> Any:
