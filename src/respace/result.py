@@ -444,6 +444,31 @@ class ResultSet:
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
+    def set(
+        self,
+        res_name: str,
+        value: Any,
+        params: ParamsSingleValue,
+        compute_time: float = np.nan,
+    ) -> None:
+        """Set value `value` for result `res_name` for set of parameters `params`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result to set.
+        value : Any
+            Value of the result to set.
+        params : ParamsSingleValue
+            Dictionary of parameters for which to set the result.
+        compute_time : float, optional
+            Time taken to compute this value, left as `numpy.nan` if unspecified.
+        """
+        complete_param_set = self.fill_with_defaults(params)
+        self[res_name].attrs["computed_values"].append(value)
+        self[res_name].attrs["compute_times"].append(compute_time)
+        self._post_compute(res_name, complete_param_set)
+
     def save(
         self,
         res_name: str,
