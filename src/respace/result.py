@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
@@ -124,6 +124,8 @@ class ResultSet:
         all parameters in the set to respectively the name of the result being saved and
         the value of the parameters. The default is
         ``"{res_name}_parameter1={parameter1}_ ..."``.
+    verbose : bool
+        Whether to print whenever a result is computed or saved.
 
     Attributes
     ----------
@@ -137,6 +139,7 @@ class ResultSet:
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
+        verbose: bool = False,
     ) -> None:
         params_set = params
         if not isinstance(params_set, ParameterSet):
@@ -155,6 +158,7 @@ class ResultSet:
             attrs=attrs,
         )
         self._save_path_fmt = save_path_fmt
+        self.verbose = verbose
 
     def __str__(self) -> str:
         return str(self.param_space)
@@ -187,6 +191,13 @@ class ResultSet:
             Parameter space(s) of `r`.
         """
         return self.param_space[r]
+
+    @property
+    def verbose_print(self) -> Callable[..., None]:
+        if self.verbose:
+            return print
+        else:
+            return lambda *a, **k: None
 
     @property
     def param_space(self) -> xr.Dataset:
@@ -365,6 +376,9 @@ class ResultSet:
             accepted by `res_name`'s computing function.
         """
         complete_param_set = self.fill_with_defaults(params)
+        self.verbose_print(
+            f"Computing {res_name} for the following parameter values:\n{complete_param_set}"
+        )
         # Add other results to add_kwargs if necessary.
         argspec = inspect.getfullargspec(self[res_name].compute_fun)
         possible_kwds = set(argspec.args + argspec.kwonlyargs)
@@ -455,6 +469,7 @@ class ResultSet:
         save_fun = self[res_name].attrs["save_fun"]
         save_path = self.get_save_path(res_name, params, save_path_fmt=save_path_fmt)
         res_value = self.get(res_name, params, **add_kwargs)
+        self.verbose_print(f"Saving {res_name} at {save_path}.")
         save_fun(res_value, save_path)
         return res_value
 
