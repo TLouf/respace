@@ -19,6 +19,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx_copybutton",
+    "sphinx_togglebutton",
     "myst_nb",
     "hoverxref.extension",
 ]
