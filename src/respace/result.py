@@ -514,7 +514,14 @@ class ResultSet:
         return value, params
 
     def add_param_values(self, values: ParamsArgType) -> None:
-        # TODO docstring
+        """Add new values to existing parameters.
+
+        Parameters
+        ----------
+        values : ParamsArgType
+            Dictionary whose keys are the parameter names, and the values either a
+            single new value for the parameter, or a sequence of them.
+        """
         reindex_dict = {}
         for p, v in values.items():
             collec = [v] if isinstance(v, Hashable) else v
