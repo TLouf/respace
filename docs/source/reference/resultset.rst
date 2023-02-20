@@ -22,6 +22,8 @@ Usual workflow
    ResultSet.compute
    ResultSet.get
    ResultSet.save
+   ResultSet.set
+   ResultSet.load
    ResultSet.get_nth_last_computed
    ResultSet.get_nth_last_details
    ResultSet.get_save_path

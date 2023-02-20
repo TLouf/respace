@@ -18,3 +18,5 @@ Types
 .. autodata:: ComputeFunType
 
 .. autodata:: SaveFunType
+
+.. autodata:: LoadFunType
