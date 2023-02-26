@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
+import pandas as pd
 import xarray as xr
-from pandas import Index
 
 # Has to be outside of `if TYPE_CHECKING` for sphinx autodoc to pick them up
 from respace._typing import (
@@ -564,21 +564,135 @@ class ResultSet:
         res = load_fun(save_path)
         return res
 
-    def get_nth_last_computed(self, res_name: str, n: int = 1) -> Any:
+    def get_nth_last_result(self, res_name: str, n: int = 1) -> Any:
+        """Get the nth last computed value of result `res_name`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the value.
+        n : int, optional
+            Negative index for which to get the value, meaning the method will return
+            list_of_values[-n]. By default the value computed last will be returned.
+
+        Returns
+        -------
+        Any
+            nth last value of result `res_name`
+        """
         return self[res_name].attrs["computed_values"][-n]
 
-    def get_nth_last_details(
+    def get_nth_last_time(self, res_name: str, n: int = 1) -> float:
+        """Get the computing time for the nth last computation of result `res_name`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the computing time.
+        n : int, optional
+            Negative index for which to get the computing time, meaning the method will
+            return list_of_times[-n]. By default the time of the last computation
+            will be returned.
+
+        Returns
+        -------
+        float
+            nth last computation time of result `res_name`
+        """
+        time: float = self[res_name].attrs["compute_times"][-n]
+        return time
+
+    def get_nth_last_params(
         self, res_name: str, n: int = 1
-    ) -> tuple[Any, dict[Hashable, Hashable]]:
-        value = self.get_nth_last_computed(res_name, n=n)
-        params_idc = np.nonzero(
-            self[res_name].param_space.data
-            == len(self[res_name].attrs["computed_values"]) - n
-        )
+    ) -> dict[Hashable, Hashable]:
+        """Get the dictionary of parameters for the nth last computation of `res_name`.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the parameters.
+        n : int, optional
+            Negative index for which to get the parameters, meaning the method will
+            return list_of_parameters[-n]. By default the parameters of the last
+            computation will be returned.
+
+        Returns
+        -------
+        dict[Hashable, Hashable]
+            Dictionary with the parameters of the nth last computation of result
+            `res_name`.
+        """
+        match_idx = len(self[res_name].attrs["computed_values"]) - n if n > 0 else n
+        params_idc = np.nonzero(self[res_name].data == match_idx)
         params = {}
         for i, d in enumerate(self.param_space.coords.keys()):
             params[d] = self.coords[d].data[params_idc[i]][0]
-        return value, params
+        return params
+
+    def get_timing_stats(
+        self, res_names: str | list[str] | None = None
+    ) -> pd.DataFrame:
+        """Get the summary statistics of the distirbutions of computing times for results.
+
+        Parameters
+        ----------
+        res_names : str | list[str] | None, optional
+            Name of the result or list of names of the results for which to get the
+            timing statistics. By default, the statistics will be returned for all
+            results.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the statistics on computing times returned by
+            :meth:`pd.Series.describe`.
+        """
+        if res_names is None:
+            res_names = list(self.param_space.data_vars.keys())
+        elif isinstance(res_names, str):
+            res_names = [res_names]
+
+        stat_df = pd.concat(
+            [
+                pd.Series(self[r].attrs["compute_times"], name=r).describe()
+                for r in res_names
+            ],
+            axis=1,
+        )
+        return stat_df.T
+
+    def rank_longest_to_compute(
+        self, res_name: str, params_as_idx: bool = False
+    ) -> pd.DataFrame:
+        """Return the ranking of parameters from longest to compute to shortest.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the ranking.
+        params_as_idx : bool, optional
+            Whether to have the parameters as part of a :class:`pd.MultiIndex` in the output DataFrame. By default, they will be as columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            DataFrame containing the ranking of computing times for result `res_name`,
+            as well as the parameters associated to these computations.
+        """
+        times: list[float] = self[res_name].attrs["compute_times"]
+        times_ordering = np.argsort(times)
+        ranking_list = []
+        for o in times_ordering:
+            ranking_list.append(self.get_nth_last_params(res_name, n=-o))
+        params_df = pd.DataFrame(ranking_list)
+        if params_as_idx:
+            ranking_df = pd.DataFrame.from_records(
+                data={"compute_times": times},
+                index=pd.MultiIndex.from_frame(params_df),
+            )
+        else:
+            ranking_df = params_df.assign(compute_times=times)
+        return ranking_df
 
     def add_param_values(self, values: ParamsArgType) -> None:
         """Add new values to existing parameters.
@@ -592,7 +706,7 @@ class ResultSet:
         reindex_dict = {}
         for p, v in values.items():
             collec = [v] if isinstance(v, Hashable) else v
-            reindex_dict[p] = self.param_space.get_index(p).union(Index(collec))
+            reindex_dict[p] = self.param_space.get_index(p).union(pd.Index(collec))
 
         self.param_space = self.param_space.reindex(reindex_dict, fill_value=-1).copy()
 
