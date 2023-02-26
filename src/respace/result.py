@@ -441,6 +441,36 @@ class ResultSet:
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
+    def get_time(self, res_name: str, params: ParamsSingleValue) -> float:
+        """Get the computing time of result `res_name` for parameters `params`.
+
+        It must have been computed beforehand.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the computing time.
+        params : ParamsSingleValue
+            Dictionary of parameters for which to get the result.
+
+        Returns
+        -------
+        float
+            Computing time, in seconds
+
+        Raises
+        ------
+        ValueError
+            If the result has never been computed.
+        """
+        complete_param_set = self.fill_with_defaults(params)
+        res_idx = self[res_name].loc[complete_param_set].values
+        if res_idx >= 0:
+            time: float = self[res_name].attrs["compute_times"][res_idx]
+            return time
+        else:
+            raise ValueError(f"{res_name} was not computed for {complete_param_set}.")
+
     def set(
         self,
         res_name: str,
