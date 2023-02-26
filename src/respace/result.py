@@ -64,6 +64,14 @@ class ResultMetadata:
 class ResultSetMetadata:
     """Represent a set of results with a mandatory name and computing function.
 
+    Parameters
+    ----------
+    results : ResultMetadata | list[ResultMetadata] | ResultsMetadataDictType
+        Input :class:`respace.Parameter` or list of :class:`respace.Parameter`
+        instances, or dictionary whose keys are result names, and whose values are
+        either a computing function, or a dictionary matching the keys of
+        :class:`respace.ResultMetadata`.
+
     Attributes
     ----------
     results : list[ResultMetadata]
