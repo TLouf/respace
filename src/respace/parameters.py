@@ -43,10 +43,11 @@ class ParameterSet:
 
     Parameters
     ----------
-    parameters : list[Parameter] | ParamsArgType
-        Input list of `Parameter` instancess, or dictionary whose keys are parameter
-        names, and whose values are either a single value, which will be the
-        default, or a sequence of values, the first of which will be the default.
+    parameters : Parameter | list[Parameter] | ParamsArgType
+        Input :class:`respace.Parameter` or list of `Parameter` instances, or dictionary
+        whose keys are parameter names, and whose values are either a single value,
+        which will be the default, or a sequence of values, the first of which will be
+        the default.
 
     Attributes
     ----------
