@@ -27,7 +27,6 @@ from respace.utils import _tracking, load_pickle, save_pickle
 
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from typing_extensions import Self
     from xarray.core.coordinates import DatasetCoordinates
 
 xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
@@ -62,7 +61,6 @@ class ResultMetadata:
     save_path_fmt: str | None = None
 
 
-@dataclass
 class ResultSetMetadata:
     """Represent a set of results with a mandatory name and computing function.
 
@@ -72,32 +70,19 @@ class ResultSetMetadata:
         List of :class:`respace.ResultMetadata` instances.
     """
 
-    results: list[ResultMetadata]
-
-    @classmethod
-    def from_dict(cls, d: ResultsMetadataDictType) -> Self:
-        """Construct ResultSetMetadata from dict describing one or several ResultMetadata.
-
-        Parameters
-        ----------
-        d : ResultsMetadataDictType
-            The dictionary's keys should be the results' names, and  its values should
-            either be a `compute_fun`, or a dictionary giving at least a `"compute_fun"`
-            and any of the other ResultMetadata attributes.
-
-        Returns
-        -------
-        Self
-        """
-        # Keys are names
-        results = []
-        for name, metadata in d.items():
-            if callable(metadata):
-                compute_fun = metadata
-                results.append(ResultMetadata(name, compute_fun))
-            else:
-                results.append(ResultMetadata(name, **metadata))
-        return cls(results)
+    def __init__(
+        self, results: ResultMetadata | list[ResultMetadata] | ResultsMetadataDictType
+    ) -> None:
+        if isinstance(results, Mapping):
+            results = [
+                ResultMetadata(name, metadata)
+                if callable(metadata)
+                else ResultMetadata(name, **metadata)
+                for name, metadata in results.items()
+            ]
+        elif isinstance(results, ResultMetadata):
+            results = [results]
+        self.results = results
 
     def __iter__(self) -> Iterator[ResultMetadata]:
         return iter(self.results)
@@ -137,9 +122,9 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata
-        | list[ResultMetadata]
-        | ResultsMetadataDictType,
+        results_metadata: (
+            ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType
+        ),
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
@@ -148,8 +133,8 @@ class ResultSet:
         params_set = params
         if not isinstance(params_set, ParameterSet):
             params_set = ParameterSet(params_set)
-        if isinstance(results_metadata, Mapping):
-            results_metadata = ResultSetMetadata.from_dict(results_metadata)
+        if not isinstance(results_metadata, ResultSetMetadata):
+            results_metadata = ResultSetMetadata(results_metadata)
 
         dims = [p.name for p in params_set]
         data = -np.ones([len(p.values) for p in params_set], dtype="int")
@@ -603,9 +588,9 @@ class ResultSet:
 
     def add_results(
         self,
-        results_metadata: ResultSetMetadata
-        | list[ResultMetadata]
-        | ResultsMetadataDictType,
+        results_metadata: (
+            ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType
+        ),
     ) -> None:
         """Add new results to the set.
 
@@ -616,8 +601,8 @@ class ResultSet:
             add. See :meth:`ResultSetMetadata.from_dict` for more information on the
             dictionary format.
         """
-        if isinstance(results_metadata, Mapping):
-            results_metadata = ResultSetMetadata.from_dict(results_metadata)
+        if not isinstance(results_metadata, ResultSetMetadata):
+            results_metadata = ResultSetMetadata(results_metadata)
 
         dims = list(self.coords)
         data = -np.ones([len(v.values) for v in self.coords.values()], dtype="int")
