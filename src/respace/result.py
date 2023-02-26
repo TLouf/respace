@@ -404,16 +404,16 @@ class ResultSet:
 
         # TODO: avoid if unnecessary?
         self.add_param_values(complete_param_set)
-        res_coord = len(self[res_name].attrs["computed_values"]) - 1
-        self[res_name].loc[complete_param_set] = res_coord
+        res_idx = len(self[res_name].attrs["computed_values"]) - 1
+        self[res_name].loc[complete_param_set] = res_idx
         return result
 
     def _post_compute(
         self, res_name: str, complete_param_set: ParamsSingleValue
     ) -> None:
         self.add_param_values(complete_param_set)
-        res_coord = len(self[res_name].attrs["computed_values"]) - 1
-        self[res_name].loc[complete_param_set] = res_coord
+        res_idx = len(self[res_name].attrs["computed_values"]) - 1
+        self[res_name].loc[complete_param_set] = res_idx
 
     def get(
         self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
@@ -438,9 +438,9 @@ class ResultSet:
         """
         complete_param_set = self.fill_with_defaults(params)
         try:
-            res_coord = self[res_name].loc[complete_param_set].values
-            if res_coord >= 0:
-                return self[res_name].attrs["computed_values"][res_coord]
+            res_idx = self[res_name].loc[complete_param_set].values
+            if res_idx >= 0:
+                return self[res_name].attrs["computed_values"][res_idx]
         except KeyError:
             # means a new parameter was passed from params, will be added by `compute`
             # anyway
