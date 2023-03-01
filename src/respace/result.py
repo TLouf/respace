@@ -397,12 +397,6 @@ class ResultSet:
         Returns
         -------
         result value : Any
-
-        Raises
-        ------
-        ValueError
-            If `params`  or `add_kwargs` contain one or more parameter that cannot be
-            accepted by `res_name`'s computing function.
         """
         complete_param_set = self.fill_with_defaults(params)
         self._verbose_print(
@@ -417,15 +411,7 @@ class ResultSet:
             for rn in possible_kwds.intersection(res_names)
         }
         add_kwargs = {**add_kwargs, **other_res_deps}
-        try:
-            result = self[res_name].tracking_compute_fun(
-                **complete_param_set, **add_kwargs
-            )
-        except TypeError as e:
-            raise ValueError(
-                "You passed new parameters, but it seems `compute_fun` was not updated"
-                " to accept them."
-            ) from e
+        result = self[res_name].tracking_compute_fun(**complete_param_set, **add_kwargs)
 
         self._post_compute(res_name, complete_param_set)
         return result
@@ -459,14 +445,9 @@ class ResultSet:
         result value : Any
         """
         complete_param_set = self.fill_with_defaults(params)
-        try:
-            res_idx = self[res_name].loc[complete_param_set].values
-            if res_idx >= 0:
-                return self[res_name].attrs["computed_values"][res_idx]
-        except KeyError:
-            # means a new parameter was passed from params, will be added by `compute`
-            # anyway
-            pass
+        res_idx = self[res_name].loc[complete_param_set].values
+        if res_idx >= 0:
+            return self[res_name].attrs["computed_values"][res_idx]
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
