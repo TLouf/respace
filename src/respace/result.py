@@ -22,7 +22,7 @@ from respace._typing import (
     ResultsMetadataDictType,
     SaveFunType,
 )
-from respace.parameters import ParameterSet
+from respace.parameters import Parameter, ParameterSet
 from respace.utils import _tracking, load_pickle, save_pickle
 
 if TYPE_CHECKING:
@@ -94,6 +94,14 @@ class ResultSetMetadata:
 
     def __iter__(self) -> Iterator[ResultMetadata]:
         return iter(self.results)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ResultSetMetadata):
+            return self.results == other.results
+        return NotImplemented
+
+    def __getitem__(self, i: int) -> ResultMetadata:
+        return self.results[i]
 
 
 # TODO: does allowing method chaining and not inplace operations make sense?
@@ -240,6 +248,30 @@ class ResultSet:
         self.__param_space = param_space_
 
     @property
+    def parameters(self) -> ParameterSet:
+        return ParameterSet(
+            [
+                Parameter(k, v.values[0], v.values.tolist())  # type: ignore[arg-type]
+                for k, v in self.coords.items()
+            ]
+        )
+
+    @property
+    def results(self) -> ResultSetMetadata:
+        return ResultSetMetadata(
+            [
+                ResultMetadata(
+                    **{
+                        attr_name: attr_value
+                        for attr_name, attr_value in res.attrs.items()
+                        if attr_name in ResultMetadata.__dataclass_fields__
+                    }
+                )
+                for res in self.param_space.values()
+            ]
+        )
+
+    @property
     def attrs(self) -> dict[str, Any]:
         """Return the attributes dictionary of the ResultSet."""
         return self.param_space.attrs
@@ -298,7 +330,7 @@ class ResultSet:
             name: {
                 attr_name: attr_value
                 for attr_name, attr_value in self[name].attrs.items()
-                if attr_name in ("compute_fun", "save_fun", "save_suffix")
+                if attr_name in ResultMetadata.__dataclass_fields__
             }
             for name in self.param_space.data_vars
         }

@@ -72,6 +72,14 @@ class ParameterSet:
     def __iter__(self) -> Iterator[Parameter]:
         return iter(self.parameters)
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, ParameterSet):
+            return self.parameters == other.parameters
+        return NotImplemented
+
+    def __getitem__(self, i: int) -> Parameter:
+        return self.parameters[i]
+
     def to_dict(self) -> dict[str, list[Hashable]]:
         """Return a dictionary giving the possible values of all parameters."""
         return {p.name: p.values for p in self}
