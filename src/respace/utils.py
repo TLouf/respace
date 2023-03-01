@@ -39,6 +39,10 @@ def load_pickle(save_path: Path | str) -> Any:
     ----------
     save_path : Path
         Path where to load the object from.
+
+    Returns
+    -------
+    Any
     """
     with open(save_path, "rb") as f:
         object = pickle.load(f)
@@ -61,12 +65,17 @@ def _tracking(
     res_name : str
         Name of the result in `result_set` for whom the computing function should be
         made tracking.
-    timed : bool, optional
+    timed : bool
         Whether to record the computing times in the `compute_times` attribute, by
         default True.
-    append_values : bool, optional
+    append_values : bool
         Whether to record the outputs in the `computed_values` attribute, by default
         True.
+
+    Returns
+    -------
+    Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]
+        Decorator for a computing function.
     """
 
     def decorator_compute(

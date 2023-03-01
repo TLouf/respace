@@ -600,7 +600,7 @@ class ResultSet:
         ----------
         res_name : str
             Name of the result for which to get the value.
-        n : int, optional
+        n : int
             Negative index for which to get the value, meaning the method will return
             list_of_values[-n]. By default the value computed last will be returned.
 
@@ -618,7 +618,7 @@ class ResultSet:
         ----------
         res_name : str
             Name of the result for which to get the computing time.
-        n : int, optional
+        n : int
             Negative index for which to get the computing time, meaning the method will
             return list_of_times[-n]. By default the time of the last computation
             will be returned.
@@ -640,7 +640,7 @@ class ResultSet:
         ----------
         res_name : str
             Name of the result for which to get the parameters.
-        n : int, optional
+        n : int
             Negative index for which to get the parameters, meaning the method will
             return list_of_parameters[-n]. By default the parameters of the last
             computation will be returned.
@@ -699,8 +699,9 @@ class ResultSet:
         ----------
         res_name : str
             Name of the result for which to get the ranking.
-        params_as_idx : bool, optional
-            Whether to have the parameters as part of a :class:`pd.MultiIndex` in the output DataFrame. By default, they will be as columns.
+        params_as_idx : bool
+            Whether to have the parameters as part of a :class:`pd.MultiIndex` in the
+            output DataFrame. By default, they will be as columns.
 
         Returns
         -------
@@ -823,9 +824,9 @@ class ResultSet:
 
         Parameters
         ----------
-        subspace_params : dict
+        subspace_params : ParamsArgType
             Dictionary giving some parameters' subset of values to keep.
-        keep_others_default_only : bool, optional
+        keep_others_default_only : bool
             If False, the default, for parameters not specified in `subspace_params`,
             keep only the coordinate of their defaults values. If True, keep all their
             values.
