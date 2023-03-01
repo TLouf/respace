@@ -258,6 +258,16 @@ class ResultSet:
         )
 
     @property
+    def params_values(self) -> ParamsMultValues:
+        """Return a dictionary with the possible values of all parameters."""
+        return {param.name: param.values for param in self.parameters}
+
+    @property
+    def params_defaults(self) -> ParamsSingleValue:
+        """Return a dictionary with the default values of all parameters."""
+        return {param.name: param.default for param in self.parameters}
+
+    @property
     def results(self) -> ResultSetMetadata:
         return ResultSetMetadata(
             [
@@ -301,16 +311,6 @@ class ResultSet:
     @save_path_fmt.setter
     def save_path_fmt(self, save_path_fmt: str | Path | None) -> None:
         self._save_path_fmt = save_path_fmt
-
-    @property
-    def params_values(self) -> ParamsMultValues:
-        """Return a dictionary with the possible values of all parameters."""
-        return {param.name: param.values for param in self.parameters}
-
-    @property
-    def params_defaults(self) -> ParamsSingleValue:
-        """Return a dictionary with the default values of all parameters."""
-        return {param.name: param.default for param in self.parameters}
 
     def set_compute_fun(self, res_name: str, compute_fun: ComputeFunType) -> None:
         """Set the computing funtion for `res_name`.
