@@ -18,7 +18,6 @@ from respace._typing import (
     ParamsMultValues,
     ParamsSingleValue,
     ParamsType,
-    ResultSetDict,
     ResultsMetadataDictType,
     SaveFunType,
 )
@@ -249,6 +248,8 @@ class ResultSet:
 
     @property
     def parameters(self) -> ParameterSet:
+        # Type ignore below because don't know how to tell mypy we've locked coords so
+        # that parameter labels as returned here below can only be strings.
         return ParameterSet(
             [
                 Parameter(k, v.values[0], v.values.tolist())  # type: ignore[arg-type]
@@ -302,39 +303,14 @@ class ResultSet:
         self._save_path_fmt = save_path_fmt
 
     @property
-    def params_values(self) -> ParamsArgType:
+    def params_values(self) -> ParamsMultValues:
         """Return a dictionary with the possible values of all parameters."""
-        # Type ignore below because don't know how to tell mypy we've locked coords so
-        # that parameter labels as returned here below can only be strings.
-        return {
-            param_name: param_values.data  # type: ignore[misc]
-            for param_name, param_values in self.coords.items()
-        }
+        return {param.name: param.values for param in self.parameters}
 
     @property
     def params_defaults(self) -> ParamsSingleValue:
         """Return a dictionary with the default values of all parameters."""
-        # Type ignore below because don't know how to tell mypy we've locked coords so
-        # that parameter labels as returned here below can only be strings.
-        return {
-            param_name: param_values.data[0]  # type: ignore[misc]
-            for param_name, param_values in self.coords.items()
-        }
-
-    @property
-    def results_metadata(self) -> dict[str, ResultSetDict]:
-        """Return a dictionary giving the metadata for all results."""
-        # Type ignore below because don't know how to tell mypy we've locked data_vars
-        # so that result labels as returned here below can only be strings.
-        metadata = {
-            name: {
-                attr_name: attr_value
-                for attr_name, attr_value in self[name].attrs.items()
-                if attr_name in ResultMetadata.__dataclass_fields__
-            }
-            for name in self.param_space.data_vars
-        }
-        return metadata  # type: ignore[return-value]
+        return {param.name: param.default for param in self.parameters}
 
     def set_compute_fun(self, res_name: str, compute_fun: ComputeFunType) -> None:
         """Set the computing funtion for `res_name`.
@@ -822,7 +798,7 @@ class ResultSet:
             complete_param_set = {**self.params_values, **subspace_params}
         param_subspace = self.param_space.loc[complete_param_set]
         subspace_res = ResultSet(
-            results_metadata=self.results_metadata, params=complete_param_set
+            results_metadata=self.results, params=complete_param_set
         )
         # values from ranking of flattened values -> array of ranks. Then subsitute
         # number of -1s in original array to have 0 actually correspond to the first
