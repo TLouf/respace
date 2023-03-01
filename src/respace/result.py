@@ -395,10 +395,7 @@ class ResultSet:
                 " to accept them."
             ) from e
 
-        # TODO: avoid if unnecessary?
-        self.add_param_values(complete_param_set)
-        res_idx = len(self[res_name].attrs["computed_values"]) - 1
-        self[res_name].loc[complete_param_set] = res_idx
+        self._post_compute(res_name, complete_param_set)
         return result
 
     def _post_compute(
