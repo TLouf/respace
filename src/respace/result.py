@@ -212,11 +212,13 @@ class ResultSet:
         param_space : xr.Dataset
             :class:`xarray.Dataset` which contains a :class:`xarray.DataArray` for each
             result of the set. Its coordinates are the possible values of all
-            parameters. Its values are the indices where the result's computated values
+            parameters. Its values are the indices where the result's computed values
             are stored in the list "computed_values", which is accessible as one of the
             attributes of the DataArray. The default value of -1 means the result has
             not been computed for the corresponding set of parameters, and a new value
-            shall be computed and appended to "computed_values".
+            shall be computed and appended to "computed_values". The dimensions (one per
+            parameter) are ordered by parameter name, in order to ensure invariance of
+            ResultSets under different orders in adding parameters.
         """
         return self.__param_space
 
