@@ -300,9 +300,8 @@ class ResultSet:
     def save_path_fmt(self) -> str:
         """Return the default format for the path where to save the results."""
         if self._save_path_fmt is None:
-            params_dict = self.params_defaults
             save_path_fmt_ = "_".join(
-                ["{res_name}"] + [f"{p}={{{p}}}" for p in params_dict]
+                ["{res_name}"] + [f"{p.name}={{{p.name}}}" for p in self.parameters]
             )
         else:
             save_path_fmt_ = str(self._save_path_fmt)
