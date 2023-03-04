@@ -770,7 +770,7 @@ class ResultSet:
 
     @property
     def populated_space(self) -> xr.Dataset:
-        return self.param_space.where(self.populated_mask, drop=True).astype("int")
+        return self.param_space.where(self.populated_mask, drop=True)
 
     def get_subspace_res(
         self,
