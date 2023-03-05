@@ -89,4 +89,4 @@ def linkcode_resolve(domain, info):
 
     fn = os.path.relpath(fn, start=os.path.dirname(respace.__file__))
 
-    return f"https://github.com/TLouf/respace/blob/master/respace/{fn}{linespec}"
+    return f"https://github.com/TLouf/respace/blob/master/src/respace/{fn}{linespec}"
