@@ -80,6 +80,9 @@ class ParameterSet:
     def __getitem__(self, i: int) -> Parameter:
         return self.parameters[i]
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({repr(self.parameters)})"
+
     def to_dict(self) -> dict[str, list[Hashable]]:
         """Return a dictionary giving the possible values of all parameters."""
         return {p.name: p.values for p in self}

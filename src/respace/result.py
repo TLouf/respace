@@ -102,6 +102,9 @@ class ResultSetMetadata:
     def __getitem__(self, i: int) -> ResultMetadata:
         return self.results[i]
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({repr(self.results)})"
+
 
 # TODO: does allowing method chaining and not inplace operations make sense?
 class ResultSet:
