@@ -18,7 +18,7 @@ from respace._typing import (
     ParamsMultValues,
     ParamsSingleValue,
     ParamsType,
-    ResultsMetadataDictType,
+    ResultSetMetadataInput,
     SaveFunType,
 )
 from respace.parameters import Parameter, ParameterSet
@@ -65,7 +65,7 @@ class ResultSetMetadata:
 
     Parameters
     ----------
-    results : ResultMetadata | list[ResultMetadata] | ResultsMetadataDictType
+    results : ResultSetMetadataInput
         Input :class:`respace.Parameter` or list of :class:`respace.Parameter`
         instances, or dictionary whose keys are result names, and whose values are
         either a computing function, or a dictionary matching the keys of
@@ -77,9 +77,7 @@ class ResultSetMetadata:
         List of :class:`respace.ResultMetadata` instances.
     """
 
-    def __init__(
-        self, results: ResultMetadata | list[ResultMetadata] | ResultsMetadataDictType
-    ) -> None:
+    def __init__(self, results: ResultSetMetadataInput) -> None:
         if isinstance(results, Mapping):
             results = [
                 ResultMetadata(name, metadata)
@@ -115,7 +113,7 @@ class ResultSet:
 
     Parameters
     ----------
-    results_metadata : ResultSetMetadata | dict
+    results_metadata : ResultSetMetadata | ResultSetMetadataInput
         :class:`ResultSetMetadata` instance or dictionary describing the results to add.
         See :meth:`ResultSetMetadata.from_dict` for more information on the dictionary
         format.
@@ -143,9 +141,7 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: (
-            ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType
-        ),
+        results_metadata: ResultSetMetadata | ResultSetMetadataInput,
         params: ParamsType,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
@@ -688,17 +684,18 @@ class ResultSet:
             ranking_df = params_df.assign(compute_times=times)
         return ranking_df
 
-    def add_param_values(self, values: ParamsArgType) -> None:
+    def add_param_values(self, params_values: ParamsArgType) -> None:
         """Add new values to existing parameters.
 
         Parameters
         ----------
-        values : ParamsArgType
+        params_values : ParamsArgType
             Dictionary whose keys are the parameter names, and the values either a
-            single new value for the parameter, or a sequence of them.
+            single new value for the parameter, or a sequence of them. Values that are
+            already present will be ignored.
         """
         reindex_dict = {}
-        for p, v in values.items():
+        for p, v in params_values.items():
             collec = [v] if isinstance(v, Hashable) else v
             reindex_dict[p] = self.param_space.get_index(p).union(pd.Index(collec))
 
@@ -734,15 +731,13 @@ class ResultSet:
 
     def add_results(
         self,
-        results_metadata: (
-            ResultSetMetadata | list[ResultMetadata] | ResultsMetadataDictType
-        ),
+        results_metadata: ResultSetMetadata | ResultSetMetadataInput,
     ) -> None:
         """Add new results to the set.
 
         Parameters
         ----------
-        results_metadata : ResultSetMetadata | ResultsMetadataDictType
+        results_metadata : ResultSetMetadata | ResultSetMetadataInput
             :class:`ResultSetMetadata` instance or dictionary describing the results to
             add. See :meth:`ResultSetMetadata.from_dict` for more information on the
             dictionary format.

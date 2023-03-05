@@ -10,6 +10,7 @@ from typing_extensions import Required
 
 if TYPE_CHECKING:
     from respace.parameters import Parameter, ParameterSet
+    from respace.result import ResultMetadata
 
 ParamsSingleValue = Mapping[str, Hashable]
 ParamsMultValues = Mapping[str, Sequence[Hashable]]
@@ -29,4 +30,8 @@ class ResultSetDict(TypedDict, total=False):
     save_path_fmt: str
 
 
-ResultsMetadataDictType = Mapping[str, ComputeFunType | ResultSetDict]
+ResultSetMetadataInput = Union[
+    "ResultMetadata",
+    list["ResultMetadata"],
+    Mapping[str, ComputeFunType | ResultSetDict],
+]
