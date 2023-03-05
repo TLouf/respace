@@ -620,6 +620,30 @@ class ResultSet:
             params[d] = self.coords[d].data[params_idc[i]][0]
         return params
 
+    def get_all_computed_values(self, res_name: str) -> dict[str, list[Any]]:
+        """Get a dictionary giving all computed values and their parameters.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get this dictionary.
+
+        Returns
+        -------
+        dict[str, list[Any]]
+            Dictionary, one key of which is the one passed with `res_name`, and the
+            corresponding value is the complete list of computed values for this result.
+            The other keys correspond to the parameter names, and the associated values
+            are the list of their values which were used to compute the corresponding
+            result.
+        """
+        flat_populated_space = self[res_name].stack(pset=list(self.coords))
+        flat_populated_space = flat_populated_space[flat_populated_space >= 0]
+        output_dict = {res_name: flat_populated_space.attrs["computed_values"]}
+        for p in self.parameters:
+            output_dict[p.name] = flat_populated_space.coords[p.name].values.tolist()
+        return output_dict
+
     def get_timing_stats(
         self, res_names: str | list[str] | None = None
     ) -> pd.DataFrame:
