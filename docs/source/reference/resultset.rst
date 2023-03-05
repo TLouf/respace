@@ -21,13 +21,35 @@ Usual workflow
 
    ResultSet.compute
    ResultSet.get
-   ResultSet.save
    ResultSet.set
-   ResultSet.load
-   ResultSet.get_nth_last_computed
-   ResultSet.get_nth_last_details
-   ResultSet.get_save_path
+   ResultSet.get_nth_last_result
+   ResultSet.get_nth_last_params
    ResultSet.is_computed
+
+
+Input-output
+------------
+
+.. autosummary::
+   :toctree: api/
+
+   ResultSet.save
+   ResultSet.load
+   ResultSet.get_save_path
+   ResultSet.save_path_fmt
+   ResultSet.set_save_fun
+
+
+Timing
+------
+
+.. autosummary::
+   :toctree: api/
+
+   ResultSet.get_time
+   ResultSet.get_nth_last_time
+   ResultSet.get_timing_stats
+   ResultSet.rank_longest_to_compute
 
 
 Accessing the parameter space
@@ -49,6 +71,7 @@ Parameters manipulation
 .. autosummary::
    :toctree: api/
 
+   ResultSet.parameters
    ResultSet.params_defaults
    ResultSet.params_values
    ResultSet.coords
@@ -63,7 +86,7 @@ Results manipulation
 .. autosummary::
    :toctree: api/
 
-   ResultSet.results_metadata
+   ResultSet.results
    ResultSet.set_compute_fun
    ResultSet.set_save_fun
    ResultSet.add_results
