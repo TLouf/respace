@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import copy
 from collections.abc import Hashable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 
@@ -82,6 +83,9 @@ class ParameterSet:
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({repr(self.parameters)})"
+
+    def copy(self) -> ParameterSet:
+        return ParameterSet(copy.deepcopy(self.parameters))
 
     def to_dict(self) -> dict[str, list[Hashable]]:
         """Return a dictionary giving the possible values of all parameters."""

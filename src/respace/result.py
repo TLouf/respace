@@ -105,6 +105,9 @@ class ResultSetMetadata:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({repr(self.results)})"
 
+    def copy(self) -> ResultSetMetadata:
+        return ResultSetMetadata(self.results.copy())
+
 
 # TODO: does allowing method chaining and not inplace operations make sense?
 class ResultSet:
