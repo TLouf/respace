@@ -428,9 +428,14 @@ class ResultSet:
         result value : Any
         """
         complete_param_set = self.fill_with_defaults(params)
-        res_idx = self[res_name].loc[complete_param_set].values
-        if res_idx >= 0:
-            return self[res_name].attrs["computed_values"][res_idx]
+        try:
+            res_idx = self[res_name].loc[complete_param_set].values
+            if res_idx >= 0:
+                return self[res_name].attrs["computed_values"][res_idx]
+        except KeyError:
+            # means a new parameter value was passed from params, will be added by
+            # `compute` anyway
+            pass
 
         return self.compute(res_name, complete_param_set, **add_kwargs)
 
