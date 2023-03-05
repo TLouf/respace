@@ -496,6 +496,7 @@ class ResultSet:
     ) -> Any:
         """Save the value of result `res_name` for set of parameters `params`.
 
+        Will use the `save_fun` attribute of that result.
         If it has not been computed yet, it will be computed before saving the value.
 
         Parameters
@@ -547,6 +548,28 @@ class ResultSet:
         save_path: Path | str | None = None,
         save_path_fmt: Path | str | None = None,
     ) -> Any:
+        """Load the value of result `res_name` for set of parameters `params`.
+
+        Will use the `load_fun` attribute of that result.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result to load.
+        params : ParamsSingleValue, optional
+            Dictionary of parameters for which to load the result. Needs to be specified
+            if `save_path` is not, to fill in a save path format.
+        save_path : Path | str | None, optional
+            Path from which to load the result.
+        save_path_fmt : Path | str | None, optional
+            Format for the path where to load the result. If not set, will be the
+            result's default `save_path_fmt`, or, if not set, the global
+            :attr:`ResultSet.save_path_fmt`.
+
+        Returns
+        -------
+        result value : Any
+        """
         if save_path is None:
             if params is None:
                 raise ValueError("Specify either `save_path` or `params`.")
