@@ -114,14 +114,16 @@ class ResultSet:
     Parameters
     ----------
     results_metadata : ResultSetMetadata | ResultSetMetadataInput
-        :class:`ResultSetMetadata` instance or dictionary describing the results to add.
-        See :meth:`ResultSetMetadata.from_dict` for more information on the dictionary
-        format.
+        :class:`ResultSetMetadata`, (list of) :class:`ResultMetadata` or dictionary
+        describing the results to add. See :class:`ResultSetMetadata` for more
+        information on the dictionary format.
     params : ParamsType
-        TODO
-        by definitions then, parameters need be of consistent type, and be Hashable
-        (because DataArray coordinates are based on :class:`pandas.Index` (ref
-        https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dimension-coordinate)
+        :class:`ParameterSet`, (list of) :class:`Parameter` or dictionary describing the
+        parameters the results depend on. See :class:`ParameterSet` for more information
+        on the dictionary format. They will be used as the coordinates of a
+        :class:`xarray.Dataset` to keep track of the results' computed values. By
+        definition then, each parameter should have a consistent type and be Hashable,
+        because Dataset coordinates are based on :class:`pandas.Index`.
     attrs : dict, optional
         Global attributes to save on this result set.
     save_path_fmt : str | Path, optional
