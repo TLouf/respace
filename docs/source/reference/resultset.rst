@@ -13,18 +13,19 @@ Constructor
    ResultSet
 
 
-Usual workflow
---------------
+Compute and retrieve
+--------------------
 
 .. autosummary::
    :toctree: api/
 
    ResultSet.compute
    ResultSet.get
-   ResultSet.set
+   ResultSet.get_all_computed_values
    ResultSet.get_nth_last_result
    ResultSet.get_nth_last_params
    ResultSet.is_computed
+   ResultSet.set
 
 
 Input-output
