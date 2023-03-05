@@ -479,7 +479,7 @@ class ResultSet:
             Value of the result to set.
         params : ParamsSingleValue
             Dictionary of parameters for which to set the result.
-        compute_time : float, optional
+        compute_time : float
             Time taken to compute this value, left as `numpy.nan` if unspecified.
         """
         complete_param_set = self.fill_with_defaults(params)
