@@ -612,7 +612,7 @@ class ResultSet:
         match_idx = len(self[res_name].attrs["computed_values"]) - n if n > 0 else n
         params_idc = np.nonzero(self[res_name].data == match_idx)
         params = {}
-        for i, d in enumerate(self.param_space.coords.keys()):
+        for i, d in enumerate(self.coords.keys()):
             params[d] = self.coords[d].data[params_idc[i]][0]
         return params
 
@@ -715,7 +715,7 @@ class ResultSet:
             params_set = ParameterSet(params)
         # Type ignore below because don't know how to tell mypy we've locked coords so
         # that parameter labels as returned here below can only be strings.
-        curr_dims = list(self.param_space.coords.keys())
+        curr_dims = list(self.coords)
         add_dims = np.asarray([p.name for p in params_set])
         add_dims_sorting = np.argsort(add_dims)
         # This works because curr_dims is assumed always sorted
@@ -745,7 +745,7 @@ class ResultSet:
             results_metadata = ResultSetMetadata(results_metadata)
 
         dims = list(self.coords)
-        data = -np.ones([len(v.values) for v in self.coords.values()], dtype="int")
+        data = -np.ones([len(p.values) for p in self.parameters], dtype="int")
         add_data_vars = {
             r.name: self._make_res_var(r, dims, data) for r in results_metadata
         }
