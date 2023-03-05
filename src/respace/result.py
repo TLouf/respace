@@ -254,6 +254,7 @@ class ResultSet:
 
     @property
     def parameters(self) -> ParameterSet:
+        """Return the data describing the parameters of the set and their values."""
         # Type ignore below because don't know how to tell mypy we've locked coords so
         # that parameter labels as returned here below can only be strings.
         return ParameterSet(
@@ -275,6 +276,7 @@ class ResultSet:
 
     @property
     def results(self) -> ResultSetMetadata:
+        """Return the metadata describing the results of the set."""
         return ResultSetMetadata(
             [
                 ResultMetadata(
