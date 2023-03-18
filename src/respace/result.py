@@ -537,6 +537,23 @@ class ResultSet:
         params: ParamsSingleValue,
         save_path_fmt: Path | str | None = None,
     ) -> Path:
+        """Get the path at which to save a result for a set of parameter values.
+
+        Parameters
+        ----------
+        res_name : str
+            Name of the result for which to get the save path.
+        params : ParamsSingleValue
+            Dictionary of parameter values for which to generate the path.
+        save_path_fmt : Path | str | None, optional
+            Format of the path to be generated. If not set, will be the result's default
+            `save_path_fmt`, or, if not set, the global :attr:`ResultSet.save_path_fmt`.
+
+        Returns
+        -------
+        Path
+            Path where to save the result `res_name`.
+        """
         if save_path_fmt is None:
             save_path_fmt = (
                 self[res_name].attrs.get("save_path_fmt") or self.save_path_fmt
