@@ -576,6 +576,11 @@ class ResultSet:
         Returns
         -------
         result value : Any
+
+        Raises
+        ------
+        ValueError
+            When neither `save_path` nor `params` was specified.
         """
         if save_path is None:
             if params is None:
