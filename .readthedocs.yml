@@ -18,4 +18,4 @@ build:
          - poetry config virtualenvs.create false
          # Install dependencies with 'docs' dependency group
          # https://python-poetry.org/docs/managing-dependencies/#dependency-groups
-         - poetry install --with docs
+         - poetry install --only docs
