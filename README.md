@@ -44,6 +44,7 @@ store them, or generally worrying about these things.
 - Handle parameter defaults.
 - Save your results at different paths depending on the set of parameters they were
   computed for, with little to no effort.
+- Track how long each computation takes to identify bottlenecks in your pipeline.
 
 
 ## Installation
