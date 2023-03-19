@@ -103,7 +103,7 @@ select = [
   # flake8-pytest-style
   "PT",
 ]
-ignore = ["E501", "D100", "D101", "D102", "D105"]
+ignore = ["E501", "D100", "D101", "D102", "D105", "UP035"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
@@ -119,8 +119,8 @@ ban-relative-imports = "all"
 [tool.ruff.per-file-ignores]
 # Don't require docstrings in tests functions:
 "tests/**/*.py" = ["D103"]
-# Don't force | instead of Union:
-"_typing.py" = ["UP007"]
+# Don't force | instead of Union and list instead of List:
+"_typing.py" = ["UP006", "UP007"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
