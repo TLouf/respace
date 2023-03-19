@@ -13,6 +13,7 @@
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json)][ruff]
 
 [pypi status]: https://pypi.org/project/respace/
 [license file]: https://github.com/TLouf/respace/blob/main/LICENSE
@@ -21,6 +22,7 @@
 [codecov]: https://app.codecov.io/gh/TLouf/respace
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
+[ruff]: https://github.com/charliermarsh/ruff
 
 </div>
 
