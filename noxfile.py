@@ -132,7 +132,7 @@ def mypy(session: Session) -> None:
     """Type-check using mypy."""
     args = session.posargs or ["src"]
     session.install(".")
-    session.install("mypy", "pytest")
+    session.install("mypy", "pytest", "pandas-stubs", "typing-extensions")
     session.run("mypy", *args)
     if not session.posargs:
         session.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -188,10 +188,14 @@ def docs_build(session: Session) -> None:
     session.install(".")
     session.install(
         "numpydoc",
-        "sphinx",
-        "sphinx_copybutton",
         "pydata-sphinx-theme",
+        "sphinx",
+        "sphinx-autobuild",
+        "sphinx_copybutton",
+        "sphinx-hoverxref",
+        "sphinx-togglebutton",
         "myst-parser",
+        "myst-nb",
     )
 
     build_dir = Path("docs", "_build")
@@ -208,11 +212,14 @@ def docs(session: Session) -> None:
     session.install(".")
     session.install(
         "numpydoc",
+        "pydata-sphinx-theme",
         "sphinx",
         "sphinx-autobuild",
         "sphinx_copybutton",
-        "pydata-sphinx-theme",
+        "sphinx-hoverxref",
+        "sphinx-togglebutton",
         "myst-parser",
+        "myst-nb",
     )
 
     build_dir = Path("docs", "_build")
