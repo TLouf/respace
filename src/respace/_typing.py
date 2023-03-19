@@ -3,11 +3,11 @@ from __future__ import annotations
 import sys
 
 if sys.version_info < (3, 9):
-    from typing import Mapping
+    from typing import Mapping, Sequence
 else:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
-from collections.abc import Callable, Hashable, Sequence
+from collections.abc import Callable, Hashable
 from pathlib import Path
 
 # Use of Union for rendering in Sphinx autodata directives
