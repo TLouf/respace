@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Hashable, Mapping, Sequence
+import sys
+
+if sys.version_info < (3, 9):
+    from typing import Mapping
+else:
+    from collections.abc import Mapping
+
+from collections.abc import Callable, Hashable, Sequence
 from pathlib import Path
 
 # Use of Union for rendering in Sphinx autodata directives
