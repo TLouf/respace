@@ -6,20 +6,20 @@ from pathlib import Path
 # Use of Union for rendering in Sphinx autodata directives
 from typing import TYPE_CHECKING, Any, TypedDict, Union
 
-from typing_extensions import Required
-
 if TYPE_CHECKING:
+    from typing_extensions import Required
+
     from respace.parameters import Parameter, ParameterSet
     from respace.result import ResultMetadata
 
 ParamsSingleValue = Mapping[str, Hashable]
 ParamsMultValues = Mapping[str, Sequence[Hashable]]
-ParamsArgType = Mapping[str, Hashable | Sequence[Hashable]]
+ParamsArgType = Mapping[str, Union[Hashable, Sequence[Hashable]]]
 ParamsType = Union["Parameter", list["Parameter"], ParamsArgType, "ParameterSet"]
 
 ComputeFunType = Callable[..., Any]
-SaveFunType = Callable[[Any, Path | str], Any]
-LoadFunType = Callable[[Path | str], Any]
+SaveFunType = Callable[[Any, Union[Path, str]], Any]
+LoadFunType = Callable[[Union[Path, str]], Any]
 
 
 class ResultSetDict(TypedDict, total=False):
@@ -33,5 +33,5 @@ class ResultSetDict(TypedDict, total=False):
 ResultSetMetadataInput = Union[
     "ResultMetadata",
     list["ResultMetadata"],
-    Mapping[str, ComputeFunType | ResultSetDict],
+    Mapping[str, Union[ComputeFunType, ResultSetDict]],
 ]

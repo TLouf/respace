@@ -4,11 +4,12 @@ import inspect
 import pickle
 import time
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Concatenate, TypeVar
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
+    from typing import Concatenate, TypeVar
 
     from typing_extensions import ParamSpec
 
