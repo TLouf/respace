@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "respace"
-version = "0.0.0"
+version = "0.1.0"
 description = "ReSpace"
 authors = ["Thomas Louf <tlouf+pro@pm.me>"]
 license = "MIT"
