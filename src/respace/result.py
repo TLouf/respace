@@ -402,7 +402,14 @@ class ResultSet:
     def _post_compute(
         self, res_name: str, complete_param_set: ParamsSingleValue
     ) -> None:
-        self.add_param_values(complete_param_set)
+        try:
+            self.add_param_values(complete_param_set)
+        except KeyError as e:
+            raise KeyError(
+                "One of the passed parameters is not present in the set. Check the name"
+                " of the parameters you passed, or, if you haven't done so already,"
+                " add new parameters with the `add_params` method."
+            ) from e
         res_idx = len(self[res_name].attrs["computed_values"]) - 1
         self[res_name].loc[complete_param_set] = res_idx
 
