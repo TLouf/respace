@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import inspect
-from collections.abc import Callable, Hashable, Iterator, Mapping, Sequence
+from collections.abc import Hashable, Iterator
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
 
 import numpy as np
 import pandas as pd

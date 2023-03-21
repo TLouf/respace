@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-import sys
-
-if sys.version_info < (3, 9):
-    from typing import Callable, Mapping, Sequence
-else:
-    from collections.abc import Callable, Mapping, Sequence
-
 from collections.abc import Hashable
 from pathlib import Path
-
-# Use of Union for rendering in Sphinx autodata directives
-from typing import TYPE_CHECKING, Any, List, TypedDict, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Mapping,
+    Sequence,
+    TypedDict,
+    Union,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Required

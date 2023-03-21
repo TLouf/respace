@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 import pickle
-import sys
 import time
 from functools import wraps
 from typing import TYPE_CHECKING, Any
@@ -12,12 +11,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import TypeVar
 
-    if sys.version_info < (3, 10):
-        from typing_extensions import Concatenate
-    else:
-        from typing import Concatenate
-
-    from typing_extensions import ParamSpec
+    from typing_extensions import Concatenate, ParamSpec
 
     from respace.result import ResultSet
 
