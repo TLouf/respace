@@ -363,7 +363,7 @@ class ResultSet:
         return self[res_name].loc[complete_param_set] >= 0
 
     def compute(
-        self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
+        self, res_name: str, params: ParamsSingleValue, **add_kwargs: Any
     ) -> Any:
         """Compute result `res_name` for set of parameters `params`.
 
@@ -373,7 +373,7 @@ class ResultSet:
             Name of the result to compute.
         params : ParamsSingleValue
             Dictionary of parameters for which to perform the computation.
-        **add_kwargs : dict[str, Any]
+        **add_kwargs : Any
             Additional keyword arguments to pass to `res_name`'s computing function,
             like external data for instance.
 
@@ -413,9 +413,7 @@ class ResultSet:
         res_idx = len(self[res_name].attrs["computed_values"]) - 1
         self[res_name].loc[complete_param_set] = res_idx
 
-    def get(
-        self, res_name: str, params: ParamsSingleValue, **add_kwargs: dict[str, Any]
-    ) -> Any:
+    def get(self, res_name: str, params: ParamsSingleValue, **add_kwargs: Any) -> Any:
         """Get the value of result `res_name` for set of parameters `params`.
 
         If it has not been computed yet, it will be computed before returning the value.
@@ -426,7 +424,7 @@ class ResultSet:
             Name of the result to get.
         params : ParamsSingleValue
             Dictionary of parameters for which to get the result.
-        **add_kwargs : dict[str, Any]
+        **add_kwargs : Any
             Additional keyword arguments to pass to `res_name`'s computing function,
             like external data for instance.
 
@@ -506,7 +504,7 @@ class ResultSet:
         res_name: str,
         params: ParamsSingleValue,
         save_path_fmt: Path | str | None = None,
-        **add_kwargs: dict[str, Any],
+        **add_kwargs: Any,
     ) -> Any:
         """Save the value of result `res_name` for set of parameters `params`.
 
@@ -523,7 +521,7 @@ class ResultSet:
             Format for the path where to save the result. If not set, will be the
             result's default `save_path_fmt`, or, if not set, the global
             :attr:`ResultSet.save_path_fmt`.
-        **add_kwargs : dict[str, Any]
+        **add_kwargs : Any
             Additional keyword arguments to pass to `res_name`'s computing function,
             like external data for instance.
 
