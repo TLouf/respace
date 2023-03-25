@@ -54,13 +54,10 @@ optional = true
 [tool.poetry.group.jupyter.dependencies]
 jupyterlab = ">= 3.6.1"
 
-[tool.coverage.paths]
-source = ["src", "*/site-packages"]
-tests = ["tests", "*/tests"]
-
 [tool.coverage.run]
 branch = true
-source = ["respace", "tests"]
+source = ["src/respace"]
+omit = ["src/respace/_typing.py"]
 
 [tool.coverage.report]
 show_missing = true
