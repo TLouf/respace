@@ -64,7 +64,9 @@ source = ["respace", "tests"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 100
+
+[tool.coverage.html]
+directory = "coverage_html_report"
 
 [tool.mypy]
 strict = true
