@@ -22,6 +22,11 @@ parameter_set = ParameterSet(parameter)
 parameter_dict = {"param": 1}
 
 
+def test_empty_result_set():
+    rs = ResultSet()
+    xr.testing.assert_equal(rs.param_space, xr.Dataset())
+
+
 class TestDataSetConstructors:
     def setup_method(self):
         self.attrs = {
