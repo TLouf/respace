@@ -53,8 +53,6 @@ def load_pickle(save_path: Path | str) -> Any:
 def _tracking(
     result_set: ResultSet,
     res_name: str,
-    timed: bool = True,
-    append_values: bool = True,
 ) -> Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]:
     """Decorate the function to compute a result in a `ResultSet` to track its outputs.
 
@@ -66,12 +64,6 @@ def _tracking(
     res_name : str
         Name of the result in `result_set` for whom the computing function should be
         made tracking.
-    timed : bool
-        Whether to record the computing times in the `compute_times` attribute, by
-        default True.
-    append_values : bool
-        Whether to record the outputs in the `computed_values` attribute, by default
-        True.
 
     Returns
     -------
@@ -91,14 +83,11 @@ def _tracking(
             fun_kwargs = {
                 kw: value for kw, value in kwargs.items() if kw in possible_kwds
             }
-            if timed:
-                start = time.time()
+            start = time.time()
             result = compute_fun(*args, **fun_kwargs)  # type: ignore[arg-type]
-            if timed:
-                end = time.time()
-                result_set[res_name].attrs["compute_times"].append(end - start)
-            if append_values:
-                result_set[res_name].attrs["computed_values"].append(result)
+            end = time.time()
+            result_set[res_name].attrs["compute_times"].append(end - start)
+            result_set[res_name].attrs["computed_values"].append(result)
             return result
 
         return wrapper_compute
