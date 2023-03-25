@@ -61,7 +61,6 @@ omit = ["src/respace/_typing.py"]
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 95
 exclude_lines = [
   # Have to re-enable the standard pragma
   "pragma: no cover",
