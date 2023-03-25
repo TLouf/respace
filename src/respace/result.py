@@ -891,6 +891,9 @@ class ResultSet:
         else:
             complete_param_set = {**self.params_values, **subspace_params}
         param_subspace = self.param_space.loc[complete_param_set]
+        new_shape = [
+            getattr(v, "__len__", lambda: 1)() for v in complete_param_set.values()
+        ]
         subspace_res = ResultSet(
             results_metadata=self.results, params=complete_param_set
         )
@@ -903,9 +906,9 @@ class ResultSet:
                 .data.flatten()
                 .argsort()
                 .argsort()
-                .reshape(param_subspace.shape)
+                .reshape(new_shape)
             )
-            param_data = param_data - (param_subspace[res_name] < 0).sum()
+            param_data = param_data - (param_subspace[res_name] < 0).sum().values
             subspace_res[res_name].data = param_data
             idc_res = np.unique(param_subspace[res_name])
             subspace_res[res_name].attrs["computed_values"] = [
