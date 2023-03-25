@@ -51,6 +51,8 @@ def tracking(
         ResultSet the decorated function will be linked to.
     res_name : str
         Name of the result to add to the set.
+    **res_metadata_kwargs: Any
+        Additional :meth:`respace.ResultMetadata` fields to populate.
 
     Returns
     -------
