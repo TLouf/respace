@@ -3,7 +3,7 @@ from importlib import metadata
 
 from respace.parameters import Parameter, ParameterSet
 from respace.result import ResultMetadata, ResultSet, ResultSetMetadata
-from respace.utils import save_pickle
+from respace.utils import load_pickle, save_pickle
 
 __all__ = [
     "Parameter",
@@ -11,6 +11,7 @@ __all__ = [
     "ResultMetadata",
     "ResultSet",
     "ResultSetMetadata",
+    "load_pickle",
     "save_pickle",
 ]
 
