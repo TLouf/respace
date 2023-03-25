@@ -22,6 +22,23 @@ parameter_set = ParameterSet(parameter)
 parameter_dict = {"param": 1}
 
 
+def test_non_str_res_name_raises():
+    msg = "Result names should be strings."
+    rs = ResultSet()
+    with pytest.raises(ValueError, match=msg):
+        ResultSet({1: lambda *args, **kwargs: 1})
+    with pytest.raises(ValueError, match=msg):
+        rs.add_results({1: lambda *args, **kwargs: 1})
+
+
+def test_non_str_param_name_raises():
+    with pytest.raises(TypeError):
+        ResultSet(params={1: 1})
+    rs = ResultSet()
+    with pytest.raises(TypeError):
+        rs.add_params({1: 1})
+
+
 def test_empty_result_set():
     rs = ResultSet()
     xr.testing.assert_equal(rs.param_space, xr.Dataset())
@@ -49,10 +66,6 @@ class TestDataSetConstructors:
         self.expected_dataset = xr.Dataset(
             data_vars={result_metadata.name: self.expected_data_array}
         )
-
-    def test_empty_result_set(self):
-        rs = ResultSet()
-        xr.testing.assert_equal(rs.param_space, xr.Dataset())
 
     @pytest.mark.parametrize(
         "results_metadata",
