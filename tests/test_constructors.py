@@ -45,6 +45,10 @@ class TestDataFrameConstructors:
             data_vars={result_metadata.name: self.expected_data_array}
         )
 
+    def test_empty_result_set(self):
+        rs = ResultSet()
+        xr.testing.assert_equal(rs.param_space, xr.Dataset())
+
     @pytest.mark.parametrize(
         "results_metadata",
         [result_metadata, [result_metadata], result_set_metadata, result_metadata_dict],

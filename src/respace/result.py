@@ -113,11 +113,11 @@ class ResultSet:
 
     Parameters
     ----------
-    results_metadata : ResultSetMetadata | ResultSetMetadataInput
+    results_metadata : ResultSetMetadata | ResultSetMetadataInput, optional
         :class:`ResultSetMetadata`, (list of) :class:`ResultMetadata` or dictionary
         describing the results to add. See :class:`ResultSetMetadata` for more
         information on the dictionary format.
-    params : ParamsType
+    params : ParamsType, optional
         :class:`ParameterSet`, (list of) :class:`Parameter` or dictionary describing the
         parameters the results depend on. See :class:`ParameterSet` for more information
         on the dictionary format. They will be used as the coordinates of a
@@ -143,26 +143,35 @@ class ResultSet:
 
     def __init__(
         self,
-        results_metadata: ResultSetMetadata | ResultSetMetadataInput,
-        params: ParamsType,
+        results_metadata: ResultSetMetadata | ResultSetMetadataInput | None = None,
+        params: ParamsType | None = None,
         attrs: dict[str, Any] | None = None,
         save_path_fmt: str | Path | None = None,
         verbose: bool = False,
     ) -> None:
-        params_set = params
-        if not isinstance(params_set, ParameterSet):
-            params_set = ParameterSet(params_set)
-        if not isinstance(results_metadata, ResultSetMetadata):
-            results_metadata = ResultSetMetadata(results_metadata)
+        if isinstance(params, ParameterSet):
+            params_set = params
+        else:
+            if params is None:
+                params = []
+            params_set = ParameterSet(params)
 
         dims = [p.name for p in params_set]
         data = -np.ones([len(p.values) for p in params_set], dtype="int")
-        data_vars = {
-            r.name: self._make_res_var(r, dims, data) for r in results_metadata
-        }
+        coords = None if len(params_set.parameters) == 0 else params_set.to_dict()
+
+        if results_metadata is None:
+            data_vars = None
+        else:
+            if not isinstance(results_metadata, ResultSetMetadata):
+                results_metadata = ResultSetMetadata(results_metadata)
+            data_vars = {
+                r.name: self._make_res_var(r, dims, data) for r in results_metadata
+            }
+
         self.param_space = xr.Dataset(
             data_vars=data_vars,
-            coords=params_set.to_dict(),
+            coords=coords,
             attrs=attrs,
         )
         self._save_path_fmt = save_path_fmt
