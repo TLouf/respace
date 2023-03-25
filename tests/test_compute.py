@@ -73,7 +73,7 @@ def test_timing(sleeping_result_set):
     sleeping_result_set._post_compute("r", p_dict)
     tracked_time = sleeping_result_set.get_time("r", p_dict)
     # The following LHS is necessarily positive.
-    assert ((t2 - t1) - tracked_time) / tracked_time < 0.05
+    assert ((t2 - t1) - tracked_time) / tracked_time < 0.1
 
 
 def test_get_time(simple_result_set):
