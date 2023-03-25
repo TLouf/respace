@@ -22,7 +22,7 @@ parameter_set = ParameterSet(parameter)
 parameter_dict = {"param": 1}
 
 
-class TestDataFrameConstructors:
+class TestDataSetConstructors:
     def setup_method(self):
         self.attrs = {
             "computed_values": [],
