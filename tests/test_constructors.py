@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import xarray as xr
 from respace import (
@@ -42,6 +43,29 @@ def test_non_str_param_name_raises():
 def test_empty_result_set():
     rs = ResultSet()
     xr.testing.assert_equal(rs.param_space, xr.Dataset())
+
+
+def test_subspace_res(generic_result_set):
+    rs = generic_result_set
+    rs.compute("r", {})
+    rs.compute("r", {"p1": 3})
+    rs.compute("r", {"p": 2, "p2": 0})
+    rs.compute("r", {"p": 2, "p1": 3})
+    sub_rs = rs.get_subspace_res({"p2": 0})
+    expected = xr.DataArray(
+        data=np.array([[[-5], [-4], [-3]], [[0], [-2], [-1]]]),
+        coords={"p": [1, 2], "p1": [2, 3, 4], "p2": [0]},
+        attrs=sub_rs["r"].attrs,
+    )
+    xr.testing.assert_equal(sub_rs["r"], expected)
+
+    sub_rs = rs.get_subspace_res({"p1": [3, 4]}, keep_others_default_only=True)
+    expected = xr.DataArray(
+        data=np.array([[[0], [-1]]]),
+        coords={"p": [1], "p1": [3, 4], "p2": [-1]},
+        attrs=sub_rs["r"].attrs,
+    )
+    xr.testing.assert_equal(sub_rs["r"], expected)
 
 
 class TestDataSetConstructors:
