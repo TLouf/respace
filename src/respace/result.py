@@ -3,6 +3,7 @@ from __future__ import annotations
 import inspect
 from collections.abc import Hashable, Iterator
 from dataclasses import asdict, dataclass
+from functools import wraps
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Mapping, Sequence, overload
 
@@ -25,10 +26,64 @@ from respace.parameters import Parameter, ParameterSet
 from respace.utils import _tracking, load_pickle, save_pickle
 
 if TYPE_CHECKING:
+    from typing import TypeVar
+
     import numpy.typing as npt
+    from typing_extensions import Concatenate, ParamSpec
     from xarray.core.coordinates import DatasetCoordinates
 
+    R = TypeVar("R")
+    P = ParamSpec("P")
+
 xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
+
+
+def tracking(
+    result_set: ResultSet,
+    res_name: str,
+    **res_metadata_kwargs: Any,
+) -> Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]:
+    """Decorate a function computing a result to link it to a :class:`ResultSet`.
+
+    Parameters
+    ----------
+    result_set : ResultSet
+        ResultSet the decorated function will be linked to.
+    res_name : str
+        Name of the result to add to the set.
+
+    Returns
+    -------
+    Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]
+        Computing function linked to the result `res_name` in `result_set`. Every time
+        it is called, new values will be added to the set, as if calling
+        :meth:`ResultSet.compute` with the input function set as `res_name`'s
+        "compute_fun".
+    """
+
+    def decorator_compute(
+        compute_fun: Callable[P, R]
+    ) -> Callable[Concatenate[Any, P], Any]:
+        result_set.add_results(
+            ResultMetadata(res_name, compute_fun, **res_metadata_kwargs)
+        )
+
+        @wraps(compute_fun)
+        def wrapper_compute(*args: P.args, **kwargs: P.kwargs) -> Any:
+            argspec = inspect.getfullargspec(result_set[res_name].compute_fun)
+            possible_kwds = argspec.args + argspec.kwonlyargs
+            fun_kwargs = {
+                kw: value for kw, value in kwargs.items() if kw in possible_kwds
+            }
+            add_kwargs = {
+                kw: value for kw, value in kwargs.items() if kw not in possible_kwds
+            }
+            result = result_set.compute(res_name, fun_kwargs, **add_kwargs)
+            return result
+
+        return wrapper_compute
+
+    return decorator_compute
 
 
 @dataclass
