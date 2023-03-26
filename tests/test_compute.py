@@ -81,6 +81,20 @@ def test_get_time_raises_for_not_computed(simple_result_set):
         simple_result_set.get_time("r", {})
 
 
+def test_get_all_computed_values(generic_result_set):
+    rs = generic_result_set
+    params_for_compute = [{"p1": 3}, {"p": 2, "p2": 0}, {"p": 2, "p1": 3}]
+    for params in params_for_compute:
+        rs.compute("r", params)
+    values = rs.get_all_computed_values("r")
+    expected = {"r": rs["r"].attrs["computed_values"]}
+    for p in generic_result_set.parameters:
+        expected[p.name] = [
+            p_dict.get(p.name, p.default) for p_dict in params_for_compute
+        ]
+    assert values == expected
+
+
 def test_set_new_value(simple_result_set, simple_parameter_set):
     existing_p = simple_result_set.coords["p"].values.tolist()
     new_p = existing_p[-1] + 1
