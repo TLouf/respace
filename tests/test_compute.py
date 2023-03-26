@@ -25,16 +25,10 @@ def test_compute_new_value(simple_result_set, simple_parameter_set):
     assert simple_result_set.parameters == expected_pset
 
 
-def test_compute_for_new_parameter(simple_result_set, simple_parameter_set):
-    existing_p = simple_result_set.coords["p"].values.tolist()
-    new_p = existing_p[-1] + 1
-    value = simple_result_set.compute("r", {"p": new_p})
-    assert value == new_p + 1
-    assert simple_result_set["r"].attrs["computed_values"] == [value]
-    assert simple_result_set["r"].loc[{"p": new_p}].values == 0
-    expected_pset = simple_parameter_set.copy()
-    expected_pset[0].values.append(2)
-    assert simple_result_set.parameters == expected_pset
+def test_compute_raises_for_unknown_parameter(simple_result_set):
+    msg = "One of the passed parameters is not present in the set."
+    with pytest.raises(KeyError, match=msg):
+        simple_result_set.compute("r", {"unknown_p": 1})
 
 
 def test_get_existing_value(current_time_result_set):
