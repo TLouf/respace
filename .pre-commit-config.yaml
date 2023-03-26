@@ -26,7 +26,7 @@ repos:
         entry: darglint
         language: system
         types: [python]
-        stages: [manual]
+        stages: [manual, push]
       - id: end-of-file-fixer
         name: Fix End of Files
         entry: end-of-file-fixer
