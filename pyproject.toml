@@ -54,6 +54,10 @@ optional = true
 [tool.poetry.group.jupyter.dependencies]
 jupyterlab = ">= 3.6.1"
 
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+tests = ["tests", "*/tests"]
+
 [tool.coverage.run]
 branch = true
 source = ["src/respace"]
