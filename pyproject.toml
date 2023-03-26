@@ -60,8 +60,7 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["src/respace"]
-omit = ["src/respace/_typing.py"]
+source = ["respace"]
 
 [tool.coverage.report]
 show_missing = true
