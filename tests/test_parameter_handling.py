@@ -1,5 +1,5 @@
 import pytest
-from respace import Parameter
+from respace import Parameter, ParameterSet
 
 
 @pytest.mark.parametrize(
@@ -9,6 +9,16 @@ from respace import Parameter
 def test_default_is_first_value(parameter):
     assert parameter.default == parameter.values[0]
     assert parameter.default not in parameter.values[1:]
+
+
+def test_parameterset_is_sorted():
+    params = [Parameter("p2", 1), Parameter("p1", "b")]
+    ps = ParameterSet(params)
+    assert ps.parameters == params[::-1]
+
+    params = [Parameter("b", 1), Parameter("a", "b")]
+    ps.parameters = params
+    assert ps.parameters == params[::-1]
 
 
 def test_parameters_property(generic_result_set, generic_parameter_set):

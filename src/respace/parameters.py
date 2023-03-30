@@ -68,7 +68,15 @@ class ParameterSet:
             ]
         elif isinstance(parameters, Parameter):
             parameters = [parameters]
-        self.parameters = sorted(parameters, key=lambda p: p.name)
+        self.parameters = list(parameters)
+
+    @property
+    def parameters(self) -> list[Parameter]:
+        return self._parameters
+
+    @parameters.setter
+    def parameters(self, _parameters: list[Parameter]) -> None:
+        self._parameters = sorted(_parameters, key=lambda p: p.name)
 
     def __iter__(self) -> Iterator[Parameter]:
         return iter(self.parameters)

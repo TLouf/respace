@@ -869,12 +869,13 @@ class ResultSet:
         # that parameter labels as returned here below can only be strings.
         curr_dims = list(self.coords)
         add_dims = np.asarray([p.name for p in params_set])
-        add_dims_sorting = np.argsort(add_dims)
         # This works because curr_dims is assumed always sorted
         axis_of_sorted_added_dims = np.searchsorted(
-            curr_dims, add_dims[add_dims_sorting]  # type: ignore[arg-type]
-        ) + np.arange(add_dims.size)
-        axis = axis_of_sorted_added_dims[add_dims_sorting].tolist()
+            curr_dims, add_dims
+        ) + np.arange(  # type: ignore[arg-type]
+            add_dims.size
+        )
+        axis = axis_of_sorted_added_dims.tolist()
         params_dict = params_set.to_dict()
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
 
