@@ -739,8 +739,8 @@ class ResultSet:
         match_idx = len(self[res_name].attrs["computed_values"]) - n if n > 0 else n
         params_idc = np.nonzero(self[res_name].data == match_idx)
         params = {}
-        for i, d in enumerate(self.coords.keys()):
-            params[d] = self.coords[d].data[params_idc[i]][0]
+        for i, (coord_name, coord_values) in enumerate(self.coords.items()):
+            params[coord_name] = coord_values.data[params_idc[i]][0]
         return params
 
     def get_all_computed_values(self, res_name: str) -> dict[str, list[Any]]:
