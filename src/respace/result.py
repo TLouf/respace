@@ -871,10 +871,8 @@ class ResultSet:
         add_dims = np.asarray([p.name for p in params_set])
         # This works because curr_dims is assumed always sorted
         axis_of_sorted_added_dims = np.searchsorted(
-            curr_dims, add_dims
-        ) + np.arange(  # type: ignore[arg-type]
-            add_dims.size
-        )
+            curr_dims, add_dims  # type: ignore[arg-type]
+        ) + np.arange(add_dims.size)
         axis = axis_of_sorted_added_dims.tolist()
         params_dict = params_set.to_dict()
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
