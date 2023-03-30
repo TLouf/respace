@@ -893,8 +893,9 @@ class ResultSet:
         if not isinstance(results_metadata, ResultSetMetadata):
             results_metadata = ResultSetMetadata(results_metadata)
 
-        dims = list(self.coords)
-        data = -np.ones([len(p.values) for p in self.parameters], dtype="int")
+        params = self.parameters
+        dims = [p.name for p in params]
+        data = -np.ones([len(p.values) for p in params], dtype="int")
         add_data_vars = {
             r.name: self._make_res_var(r, dims, data) for r in results_metadata
         }
