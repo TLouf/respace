@@ -875,7 +875,18 @@ class ResultSet:
         ) + np.arange(add_dims.size)
         axis = axis_of_sorted_added_dims.tolist()
         params_dict = params_set.to_dict()
+        # This will sort each DataArray's dimensions but not the Dataset's. Sould be ok
+        # though. See https://github.com/pydata/xarray/issues/7456.
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
+        params_with_mult_values = [p for p in params_set if len(p.values) > 1]
+        if len(params_with_mult_values) > 0:
+            # A copy is necessary, see https://github.com/pydata/xarray/issues/3813.
+            param_space = self.param_space.copy(deep=True)
+            # Set results as not computed yet for values of new parameters that are not
+            # the default.
+            for param in params_with_mult_values:
+                param_space.loc[{param.name: param.values[1:]}] = -1
+            self.param_space = param_space
 
     def add_results(
         self,

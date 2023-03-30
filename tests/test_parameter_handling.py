@@ -41,5 +41,11 @@ def test_add_values(generic_result_set, generic_parameter_set):
 
 
 def test_add_params(simple_result_set, generic_parameter_set):
-    simple_result_set.add_params({"p1": [2, 3, 4], "p2": [-1, 0]})
+    simple_result_set.compute("r", {})
+    simple_result_set.add_params({"p2": [-1, 0], "p1": [2, 3, 4]})
     assert simple_result_set.parameters == generic_parameter_set
+
+    expected_order = [p.name for p in generic_parameter_set]
+    assert list(simple_result_set["r"].dims) == expected_order
+
+    assert simple_result_set.populated_space.sum() == 1
