@@ -27,6 +27,7 @@ extensions = [
 python_use_unqualified_type_names = True
 autodoc_typehints_format = "short"
 numpydoc_show_class_members = False
+nb_execution_raise_on_error = True
 
 hoverxref_auto_ref = True
 hoverxref_domains = ["py"]
