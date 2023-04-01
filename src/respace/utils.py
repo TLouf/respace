@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import TypeVar
 
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import ParamSpec
 
     from respace.result import ResultSet
 
@@ -53,7 +53,7 @@ def load_pickle(save_path: Path | str) -> Any:
 def _tracking(
     result_set: ResultSet,
     res_name: str,
-) -> Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]:
+) -> Callable[[Callable[P, R]], Callable[[int, Any], R]]:
     """Decorate the function to compute a result in a `ResultSet` to track its outputs.
 
     Parameters
@@ -67,27 +67,27 @@ def _tracking(
 
     Returns
     -------
-    Callable[[Callable[P, R]], Callable[Concatenate[Any, P], R]]
+    Callable[[Callable[P, R]], Callable[Any, R]]
         Decorator for a computing function.
     """
 
-    def decorator_compute(
-        compute_fun: Callable[P, R]
-    ) -> Callable[Concatenate[Any, P], R]:
+    def decorator_compute(compute_fun: Callable[P, R]) -> Callable[[int, Any], R]:
         @wraps(compute_fun)
-        # TODO: way to annotate type of kwargs as superset of P.kwargs? to remove
-        # type ignore below.
-        def wrapper_compute(*args: P.args, **kwargs: P.kwargs) -> R:
+        def wrapper_compute(*args: Any, prev_res_idx: int = -1, **kwargs: Any) -> R:
             argspec = inspect.getfullargspec(result_set[res_name].compute_fun)
             possible_kwds = argspec.args + argspec.kwonlyargs
             fun_kwargs = {
                 kw: value for kw, value in kwargs.items() if kw in possible_kwds
             }
             start = time.time()
-            result = compute_fun(*args, **fun_kwargs)  # type: ignore[arg-type]
+            result = compute_fun(*args, **fun_kwargs)
             end = time.time()
-            result_set[res_name].attrs["compute_times"].append(end - start)
-            result_set[res_name].attrs["computed_values"].append(result)
+            if prev_res_idx < 0:
+                result_set[res_name].attrs["compute_times"].append(end - start)
+                result_set[res_name].attrs["computed_values"].append(result)
+            else:
+                result_set[res_name].attrs["compute_times"][prev_res_idx] = end - start
+                result_set[res_name].attrs["computed_values"][prev_res_idx] = result
             return result
 
         return wrapper_compute

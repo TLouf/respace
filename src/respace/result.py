@@ -451,6 +451,7 @@ class ResultSet:
         self._verbose_print(
             f"Computing {res_name} for the following parameter values:\n{complete_param_set}"
         )
+        prev_res_idx = self._pre_compute(res_name, complete_param_set)
         # Add other results to add_kwargs if necessary.
         argspec = inspect.getfullargspec(self[res_name].compute_fun)
         possible_kwds = set(argspec.args + argspec.kwonlyargs)
@@ -460,14 +461,16 @@ class ResultSet:
             for rn in possible_kwds.intersection(res_names)
         }
         add_kwargs = {**add_kwargs, **other_res_deps}
-        result = self[res_name].tracking_compute_fun(**complete_param_set, **add_kwargs)
-
-        self._post_compute(res_name, complete_param_set)
+        result = self[res_name].tracking_compute_fun(
+            prev_res_idx=prev_res_idx, **complete_param_set, **add_kwargs
+        )
         return result
 
-    def _post_compute(
-        self, res_name: str, complete_param_set: ParamsSingleValue
-    ) -> None:
+    def _pre_compute(
+        self,
+        res_name: str,
+        complete_param_set: ParamsSingleValue,
+    ) -> int:
         try:
             self.add_param_values(complete_param_set)
         except KeyError as e:
@@ -476,8 +479,11 @@ class ResultSet:
                 " of the parameters you passed, or, if you haven't done so already,"
                 " add new parameters with the `add_params` method."
             ) from e
-        res_idx = len(self[res_name].attrs["computed_values"]) - 1
-        self[res_name].loc[complete_param_set] = res_idx
+        prev_res_idx: int = self[res_name].loc[complete_param_set].values.item(0)
+        if prev_res_idx < 0:
+            res_idx = len(self[res_name].attrs["computed_values"])
+            self[res_name].loc[complete_param_set] = res_idx
+        return prev_res_idx
 
     def get(self, res_name: str, params: ParamsSingleValue, **add_kwargs: Any) -> Any:
         """Get the value of result `res_name` for set of parameters `params`.
@@ -561,9 +567,13 @@ class ResultSet:
             Time taken to compute this value, left as `numpy.nan` if unspecified.
         """
         complete_param_set = self.fill_with_defaults(params)
-        self[res_name].attrs["computed_values"].append(value)
-        self[res_name].attrs["compute_times"].append(compute_time)
-        self._post_compute(res_name, complete_param_set)
+        prev_res_idx = self._pre_compute(res_name, complete_param_set)
+        if prev_res_idx < 0:
+            self[res_name].attrs["compute_times"].append(compute_time)
+            self[res_name].attrs["computed_values"].append(value)
+        else:
+            self[res_name].attrs["compute_times"][prev_res_idx] = compute_time
+            self[res_name].attrs["computed_values"][prev_res_idx] = value
 
     def save(
         self,
