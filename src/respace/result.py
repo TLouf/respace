@@ -875,7 +875,7 @@ class ResultSet:
         ) + np.arange(add_dims.size)
         axis = axis_of_sorted_added_dims.tolist()
         params_dict = params_set.to_dict()
-        # This will sort each DataArray's dimensions but not the Dataset's. Sould be ok
+        # This will sort each DataArray's dimensions but not the Dataset's. Should be ok
         # though. See https://github.com/pydata/xarray/issues/7456.
         self.param_space = self.param_space.expand_dims(params_dict, axis=axis)
         params_with_mult_values = [p for p in params_set if len(p.values) > 1]
