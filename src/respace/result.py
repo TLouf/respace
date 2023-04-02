@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 xr.set_options(keep_attrs=True)  # type: ignore[no-untyped-call]
 
 
+# TODO: give the option to perform a get instead of a compute?
 def tracking(
     result_set: ResultSet,
     res_name: str,
@@ -77,6 +78,8 @@ def tracking(
             fun_kwargs = {
                 kw: value for kw, value in kwargs.items() if kw in possible_kwds
             }
+            for i, arg in enumerate(args):
+                fun_kwargs[argspec.args[i]] = arg
             add_kwargs = {
                 kw: value for kw, value in kwargs.items() if kw not in possible_kwds
             }

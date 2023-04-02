@@ -13,6 +13,10 @@ def test_tracking_new_result(simple_parameter, simple_result_metadata):
     assert rs[res_name].attrs["computed_values"] == [res_fun(2)]
     assert r == res_fun(2)
 
+    r = tracking_fun(3)
+    assert rs[res_name].attrs["computed_values"] == [res_fun(2), res_fun(3)]
+    assert r == res_fun(3)
+
 
 def test_tracking_existing_result(simple_result_metadata, simple_result_set):
     res_name = simple_result_metadata.name
