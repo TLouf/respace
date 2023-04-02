@@ -1,1 +1,4 @@
 * text=auto eol=lf
+
+docs/source/**/*.ipynb filter=nbstripout
+docs/source/**/*.ipynb diff=ipynb
