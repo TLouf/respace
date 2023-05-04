@@ -12,12 +12,8 @@ build:
    jobs:
       post_create_environment:
          # Install poetry
-         # https://python-poetry.org/docs/#installing-manually
          - pip install poetry
          # Tell poetry to not use a virtual environment
          - poetry config virtualenvs.create false
-         - poetry install --only main
-         # Extremely weird bug with the wheels of pydata-sphinx-theme if we use poetry,
-         # so resorting to exporting the environment and installing with pip.
-         - poetry export --format=requirements.txt --only docs > requirements.txt
-         - pip install -r requirements.txt
+         # Install dependencies with 'docs' dependency group
+         - poetry install --only main,docs
